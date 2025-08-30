@@ -8,8 +8,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.oxcodsnet.beltborne_lanterns.fabric.client.ExampleModFabricClient;
-import net.oxcodsnet.beltborne_lanterns.fabric.config.BLClientConfig;
+import net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricClient;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
 
 /**
@@ -36,8 +36,8 @@ public class LanternDebugScreen extends Screen {
 
     @Override
     protected void init() {
-        prevDebugEnabled = ExampleModFabricClient.isDebugDrawEnabled();
-        ExampleModFabricClient.setDebugDrawEnabled(true);
+        prevDebugEnabled = BLFabricClient.isDebugDrawEnabled();
+        BLFabricClient.setDebugDrawEnabled(true);
 
         int left = 20;
         int top = 30;
@@ -89,8 +89,8 @@ public class LanternDebugScreen extends Screen {
         int right = this.width - 20 - 100;
         addDrawableChild(ButtonWidget.builder(Text.literal("Step: " + stepText()), b -> { cycleStep(); b.setMessage(Text.literal("Step: " + stepText())); }).dimensions(right, 30, 100, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Axes: ON"), b -> {
-            boolean now = !ExampleModFabricClient.isDebugDrawEnabled();
-            ExampleModFabricClient.setDebugDrawEnabled(now);
+            boolean now = !BLFabricClient.isDebugDrawEnabled();
+            BLFabricClient.setDebugDrawEnabled(now);
             b.setMessage(Text.literal("Axes: " + (now ? "ON" : "OFF")));
         }).dimensions(right, 54, 100, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Copy values"), b -> { copyValuesToClipboard(); }).dimensions(right, 78, 100, 20).build());
@@ -168,7 +168,7 @@ public class LanternDebugScreen extends Screen {
 
     @Override
     public void close() {
-        ExampleModFabricClient.setDebugDrawEnabled(prevDebugEnabled);
+        BLFabricClient.setDebugDrawEnabled(prevDebugEnabled);
         super.close();
     }
 

@@ -10,19 +10,21 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
+import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
 import me.shedaniel.autoconfig.AutoConfig;
-import net.oxcodsnet.beltborne_lanterns.fabric.config.BLClientConfig;
-import net.oxcodsnet.beltborne_lanterns.fabric.client.physics.LanternSwingManager;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
+import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public final class ExampleModFabricClient implements ClientModInitializer {
+public final class BLFabricClient implements ClientModInitializer {
     // Client-only cache of players who currently have a belt lantern
     private static final Set<UUID> CLIENT_BELT_PLAYERS = new HashSet<>();
     private static KeyBinding openConfigKey;
@@ -78,6 +80,12 @@ public final class ExampleModFabricClient implements ClientModInitializer {
                 "category.beltborne_lanterns"
         ));
 
+        // Wire platform abstractions so common renderer can query state/debug
+        BLClientAbstractions.init(
+                (player) -> clientHasLantern(player),
+                () -> isDebugDrawEnabled()
+        );
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKey.wasPressed()) {
                 if (client.currentScreen == null) {
@@ -100,7 +108,7 @@ public final class ExampleModFabricClient implements ClientModInitializer {
                 final float dt = 1.0f / 20.0f;
                 for (PlayerEntity p : client.world.getPlayers()) {
                     if (clientHasLantern(p)) {
-                        LanternSwingManager.tickPlayer(p, dt);
+                        LanternSwingManager.tickPlayer(p, dt, BLConfigs.get().rotXDeg);
                     }
                 }
             }

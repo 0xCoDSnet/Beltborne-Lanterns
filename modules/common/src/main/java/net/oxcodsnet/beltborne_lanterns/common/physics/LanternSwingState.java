@@ -1,6 +1,4 @@
-package net.oxcodsnet.beltborne_lanterns.fabric.client.physics;
-
-import net.minecraft.entity.player.PlayerEntity;
+package net.oxcodsnet.beltborne_lanterns.common.physics;
 
 /**
  * Simple 2-axis spring–damper (second-order) for lantern sway.

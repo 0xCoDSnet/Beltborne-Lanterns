@@ -1,16 +1,14 @@
-package net.oxcodsnet.beltborne_lanterns.fabric.client.physics;
+package net.oxcodsnet.beltborne_lanterns.common.physics;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
-import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Registry + updater for per-player lantern sway physics on client.
+ * Registry + updater for per-player lantern sway physics (platform-agnostic).
  * Keeps minimal kinematics to build forcing and impulses.
  */
 public final class LanternSwingManager {
@@ -45,7 +43,7 @@ public final class LanternSwingManager {
     }
 
     /** Call once per client tick (20Hz). dtSec should be 1/20. */
-    public static void tickPlayer(PlayerEntity p, float dtSec) {
+    public static void tickPlayer(PlayerEntity p, float dtSec, float baseRotXDeg) {
         final UUID id = p.getUuid();
         final LanternSwingState state = getOrCreate(id);
         final Kinematics kin = KIN.computeIfAbsent(id, u -> new Kinematics());
@@ -113,8 +111,8 @@ public final class LanternSwingManager {
             state.impulseX(IMPULSE_STOP_MOVE_X);
         }
 
-        // Smooth target base X (sneak pose) — approach towards 215° or config rotX
-        float targetBaseX = sneaking ? 215f : BLConfigHolder.get().rotXDeg;
+        // Smooth target base X (sneak pose) — approach towards 215° or provided baseRotXDeg
+        float targetBaseX = sneaking ? 215f : baseRotXDeg;
         if (!kin.baseInit) {
             kin.baseXDegSmoothed = targetBaseX;
             kin.baseInit = true;
@@ -148,7 +146,7 @@ public final class LanternSwingManager {
 
     public static float getBaseXDeg(UUID id) {
         Kinematics k = KIN.get(id);
-        if (k == null) return BLConfigHolder.get().rotXDeg;
+        if (k == null) return 0f;
         return k.baseXDegSmoothed;
     }
 
@@ -176,3 +174,4 @@ public final class LanternSwingManager {
         boolean baseInit = false;
     }
 }
+

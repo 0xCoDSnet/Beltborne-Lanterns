@@ -1,11 +1,11 @@
-package net.oxcodsnet.beltborne_lanterns.fabric.config;
+package net.oxcodsnet.beltborne_lanterns.common.config;
 
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
-import net.oxcodsnet.beltborne_lanterns.ExampleMod;
+import net.oxcodsnet.beltborne_lanterns.BLMod;
 
-@Config(name = ExampleMod.MOD_ID)
+@Config(name = BLMod.MOD_ID)
 public class BLClientConfig implements ConfigData {
     // {offset:[-0,25,-0,05,-0,60], pivot:[0,50,0,60,0,50], rot:[180,0,0], scale:0,50}
     @ConfigEntry.Gui.Tooltip

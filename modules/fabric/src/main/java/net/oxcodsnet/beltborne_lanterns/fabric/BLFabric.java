@@ -13,12 +13,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 
-import net.oxcodsnet.beltborne_lanterns.ExampleMod;
+import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
 
-public final class ExampleModFabric implements ModInitializer {
+public final class BLFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -26,7 +26,7 @@ public final class ExampleModFabric implements ModInitializer {
         // Proceed with mild caution.
 
         // Run our common setup.
-        ExampleMod.init();
+        BLMod.init();
 
         // Initialize AutoConfig holder (client will also init if needed)
         try { BLConfigHolder.init(); } catch (Throwable ignored) {}

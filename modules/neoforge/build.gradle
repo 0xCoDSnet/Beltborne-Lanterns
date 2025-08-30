@@ -36,16 +36,30 @@ dependencies {
 
     // Architectury API. This is optional, and you can comment it out if you don't need it.
     //modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
+    modImplementation "me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_config_version}"
 
     common(project(path: ':modules:common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionNeoForge')
 }
 
 processResources {
-    inputs.property 'version', project.version
+    def props = [
+            version              : project.version,
+            mod_id               : rootProject.findProperty('mod_id'),
+            mod_name             : rootProject.findProperty('mod_name'),
+            mod_description      : rootProject.findProperty('mod_description'),
+            mod_authors          : rootProject.findProperty('mod_authors'),
+            mod_homepage         : rootProject.findProperty('mod_homepage'),
+            mod_sources          : rootProject.findProperty('mod_sources'),
+            mod_license          : rootProject.findProperty('mod_license'),
+            minecraft_version    : rootProject.findProperty('minecraft_version'),
+            neoforge_version     : rootProject.findProperty('neoforge_version'),
+            cloth_config_version : rootProject.findProperty('cloth_config_version'),
+    ]
+    inputs.properties(props)
 
     filesMatching('META-INF/neoforge.mods.toml') {
-        expand version: inputs.properties.version
+        expand(props)
     }
 }
 
@@ -56,4 +70,6 @@ shadowJar {
 
 remapJar {
     inputFile.set shadowJar.archiveFile
+    // TODO: Изменить название файла на нормальное!
+    // archiveFileName.set("roadarchitect_encounters-${project.version}-neoforge+${rootProject.minecraft_version}.jar")
 }

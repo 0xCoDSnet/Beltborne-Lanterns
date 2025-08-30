@@ -20,7 +20,7 @@ final class LambDynLightsCompat {
             Class<?> handlersClass = Class.forName("dev.lambdaurora.lambdynlights.api.DynamicLightHandlers");
 
             Function<PlayerEntity, Integer> luminance = player ->
-                    ExampleModFabricClient.clientHasLantern(player) ? 15 : 0;
+                    BLFabricClient.clientHasLantern(player) ? 15 : 0;
             Function<PlayerEntity, Boolean> waterSensitive = player -> false;
 
             Method makeHandler = handlerClass.getMethod("makeHandler", Function.class, Function.class);
@@ -36,4 +36,3 @@ final class LambDynLightsCompat {
         }
     }
 }
-

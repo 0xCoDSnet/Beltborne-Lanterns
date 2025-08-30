@@ -1,37 +1,36 @@
 {
   "schemaVersion": 1,
-  "id": "beltborne_lanterns",
+  "id": "${mod_id}",
   "version": "${version}",
-  "name": "Beltborne Lanterns",
-  "description": "This is an example description! Tell everyone what your mod is about!",
-  "authors": [
-    "Me!"
-  ],
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": ["${mod_authors}"],
+  "license": "${mod_license}",
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "${mod_sources}",
+    "homepage": "${mod_homepage}"
   },
-  "license": "CC0-1.0",
   "icon": "assets/beltborne_lanterns/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.oxcodsnet.beltborne_lanterns.fabric.ExampleModFabric"
+      "net.oxcodsnet.beltborne_lanterns.fabric.BLFabric"
     ],
     "client": [
-      "net.oxcodsnet.beltborne_lanterns.fabric.client.ExampleModFabricClient"
+      "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricClient"
     ]
   },
   "mixins": [
     "beltborne_lanterns.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.17.2",
-    "minecraft": "~1.21",
+    "fabricloader": ">=${fabric_loader_version}",
+    "minecraft": "~${minecraft_version}",
     "java": ">=21",
-    "fabric-api": "*"
+    "fabric-api": "*",
+    "cloth-config2": ">=${cloth_config_version}"
   },
   "suggests": {
-    "another-mod": "*"
+    "modmenu": "${modmenu_version}"
   }
 }
