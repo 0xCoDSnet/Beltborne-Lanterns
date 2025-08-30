@@ -17,18 +17,18 @@ public class BLClientConfig implements ConfigData {
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
-    public int offsetZ100 = -45; // -0.14
+    public int offsetZ100 = -37; // -0.14
 
     @ConfigEntry.Gui.Tooltip
-    @ConfigEntry.BoundedDiscrete(min = 0, max = 360)
+    @ConfigEntry.BoundedDiscrete(min = -360, max = 360)
     public int rotXDeg = 180;
 
     @ConfigEntry.Gui.Tooltip
-    @ConfigEntry.BoundedDiscrete(min = 0, max = 360)
+    @ConfigEntry.BoundedDiscrete(min = -360, max = 360)
     public int rotYDeg = 90;
 
     @ConfigEntry.Gui.Tooltip
-    @ConfigEntry.BoundedDiscrete(min = 0, max = 360)
+    @ConfigEntry.BoundedDiscrete(min = -360, max = 360)
     public int rotZDeg = 0;
 
     @ConfigEntry.Gui.Tooltip
