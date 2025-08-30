@@ -90,6 +90,8 @@ public final class BLFabricClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKey.wasPressed()) {
                 if (client.currentScreen == null) {
+                    // Ensure AutoConfig is initialized before opening the screen
+                    net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess.get();
                     client.setScreen(AutoConfig.getConfigScreen(BLClientConfig.class, client.currentScreen).get());
                 }
             }

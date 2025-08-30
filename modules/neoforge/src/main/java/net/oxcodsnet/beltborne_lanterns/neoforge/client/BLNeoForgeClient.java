@@ -10,10 +10,13 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
@@ -33,6 +36,18 @@ public final class BLNeoForgeClient {
     public static void onClientSetup(FMLClientSetupEvent event) {
         // Provide platform bridges for common renderer
         BLClientAbstractions.init(BLNeoForgeClient::clientHasLantern, BLClientAbstractions::isDebugDrawEnabled);
+
+        // Register the config screen with NeoForge's extension point
+        ModLoadingContext.get().registerExtensionPoint(
+                IConfigScreenFactory.class,
+                () -> (mc, parent) -> {
+                    // Ensure AutoConfig is registered before opening the screen
+                    BLClientConfigAccess.get();
+                    return me.shedaniel.autoconfig.AutoConfig
+                            .getConfigScreen(BLClientConfig.class, parent)
+                            .get();
+                }
+        );
     }
 
     private static boolean clientHasLantern(PlayerEntity p) {

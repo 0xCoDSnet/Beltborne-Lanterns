@@ -22,7 +22,7 @@ public final class BLClientAbstractions {
 
     public static void init(Predicate<PlayerEntity> hasLanternPredicate, Supplier<Boolean> debugSupplier) {
         hasLantern = Objects.requireNonNull(hasLanternPredicate);
-        debugEnabled = Objects.requireNonNull(debugSupplier);
+        // Keep using the internal atomic debug flag; ignore external supplier to avoid self-recursion.
     }
 
     public static void setDebugSetter(Consumer<Boolean> setter) {

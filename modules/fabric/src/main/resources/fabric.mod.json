@@ -18,6 +18,9 @@
     ],
     "client": [
       "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricClient"
+    ],
+    "modmenu": [
+      "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricModMenu"
     ]
   },
   "mixins": [
