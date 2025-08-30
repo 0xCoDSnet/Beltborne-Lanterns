@@ -24,7 +24,7 @@ versionRange = "[1.21,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.beltborne_lanterns]]
 modId = "cloth_config"
 type = "required"
 versionRange = "[${cloth_config_version},)"
