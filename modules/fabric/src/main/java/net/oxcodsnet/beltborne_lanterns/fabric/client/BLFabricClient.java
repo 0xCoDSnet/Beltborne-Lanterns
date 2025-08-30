@@ -10,32 +10,22 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
+import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
-import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
-import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
-import me.shedaniel.autoconfig.AutoConfig;
-import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
-import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
+import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
+import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientLogic;
+import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 public final class BLFabricClient implements ClientModInitializer {
-    // Client-only cache of players who currently have a belt lantern
-    private static final Set<UUID> CLIENT_BELT_PLAYERS = new HashSet<>();
+    // Keybindings
     private static KeyBinding openConfigKey;
     private static KeyBinding toggleDebugKey;
     private static KeyBinding openDebugEditorKey;
-    private static boolean debugDrawEnabled = false;
-
-    public static boolean clientHasLantern(PlayerEntity player) {
-        return CLIENT_BELT_PLAYERS.contains(player.getUuid());
-    }
 
     @Override
     public void onInitializeClient() {
@@ -44,7 +34,7 @@ public final class BLFabricClient implements ClientModInitializer {
             UUID uuid = payload.playerUuid();
             boolean has = payload.hasLantern();
             MinecraftClient.getInstance().execute(() -> {
-                if (has) CLIENT_BELT_PLAYERS.add(uuid); else CLIENT_BELT_PLAYERS.remove(uuid);
+                ClientBeltPlayers.setHas(uuid, has);
             });
         });
 
@@ -82,23 +72,17 @@ public final class BLFabricClient implements ClientModInitializer {
         ));
 
         // Wire platform abstractions so common renderer can query state/debug
-        BLClientAbstractions.init(
-                BLFabricClient::clientHasLantern,
-                BLClientAbstractions::isDebugDrawEnabled
-        );
+        BLClientAbstractions.init(ClientBeltPlayers::hasLantern, BLClientAbstractions::isDebugDrawEnabled);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKey.wasPressed()) {
                 if (client.currentScreen == null) {
-                    // Ensure AutoConfig is initialized before opening the screen
-                    net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess.get();
-                    client.setScreen(AutoConfig.getConfigScreen(BLClientConfig.class, client.currentScreen).get());
+                    client.setScreen(LanternClientScreens.openConfig(client.currentScreen));
                 }
             }
 
             if (toggleDebugKey.wasPressed()) {
-                debugDrawEnabled = !debugDrawEnabled;
-                BLClientAbstractions.setDebugDrawEnabled(debugDrawEnabled);
+                BLClientAbstractions.setDebugDrawEnabled(!BLClientAbstractions.isDebugDrawEnabled());
             }
 
             if (openDebugEditorKey.wasPressed()) {
@@ -108,22 +92,9 @@ public final class BLFabricClient implements ClientModInitializer {
             }
 
             // Update lantern physics states for players who have a belt lantern
-            if (client.world != null) {
-                final float dt = 1.0f / 20.0f;
-                for (PlayerEntity p : client.world.getPlayers()) {
-                    if (clientHasLantern(p)) {
-                        LanternSwingManager.tickPlayer(p, dt, BLConfigs.get().rotXDeg);
-                    }
-                }
-            }
+            LanternClientLogic.tickLanternPhysics(client);
         });
     }
 
-    public static boolean isDebugDrawEnabled() {
-        return debugDrawEnabled;
-    }
-
-    public static void setDebugDrawEnabled(boolean enabled) {
-        debugDrawEnabled = enabled;
-    }
+    // Debug flag is maintained via BLClientAbstractions
 }

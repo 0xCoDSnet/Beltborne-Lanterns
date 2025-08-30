@@ -38,6 +38,11 @@ public class LanternDebugScreen extends Screen {
         int row = 0;
         int colGap = 78;
 
+        // Right column for scale/step/copy to save horizontal space
+        int rightColWidth = 240;
+        int rightX = this.width - 20 - rightColWidth;
+        int rightRow = 0;
+
         // Helper lambdas
         Runnable save = BLClientConfigAccess::save;
         BLClientConfig cfg = BLClientConfigAccess.get();
@@ -75,17 +80,31 @@ public class LanternDebugScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Z+"), b -> { cfg.rotZDeg += scaledRotStepDeg(); save.run(); refreshCopyPreview(); }).dimensions(left + colGap, top + row * 22, 50, 20).build());
         row++;
 
-        // Section: Scale + Step toggle (no overlaps)
-        addDrawableChild(ButtonWidget.builder(Text.literal("Scale -"), b -> { cfg.scale100 = Math.max(1, cfg.scale100 - scaledScaleStep100()); save.run(); refreshCopyPreview(); }).dimensions(left, top + row * 22, 60, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Scale +"), b -> { cfg.scale100 += scaledScaleStep100(); save.run(); refreshCopyPreview(); }).dimensions(left + 64, top + row * 22, 60, 20).build());
-        stepButton = addDrawableChild(ButtonWidget.builder(Text.literal("Step: " + stepText()), b -> { cycleStep(); stepButton.setMessage(Text.literal("Step: " + stepText())); }).dimensions(left + colGap, top + row * 22, 80, 20).build());
-        row++;
+        // Section (right): Scale + Step
+        addDrawableChild(ButtonWidget.builder(Text.literal("Scale -"), b -> {
+            cfg.scale100 = Math.max(1, cfg.scale100 - scaledScaleStep100());
+            save.run();
+            refreshCopyPreview();
+        }).dimensions(rightX, top + rightRow * 22, 70, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Scale +"), b -> {
+            cfg.scale100 += scaledScaleStep100();
+            save.run();
+            refreshCopyPreview();
+        }).dimensions(rightX + 74, top + rightRow * 22, 70, 20).build());
+        stepButton = addDrawableChild(ButtonWidget.builder(Text.literal("Step: " + stepText()), b -> {
+            cycleStep();
+            stepButton.setMessage(Text.literal("Step: " + stepText()));
+        }).dimensions(rightX + 148, top + rightRow * 22, 90, 20).build());
+        rightRow++;
 
-        // Copy preview & button
-        copyPreviewField = new TextFieldWidget(this.textRenderer, left, top + row * 22, 220, 20, Text.literal("CopyPreview"));
+        // Section (right): Copy preview & button
+        int previewWidth = 180;
+        copyPreviewField = new TextFieldWidget(this.textRenderer, rightX, top + rightRow * 22, previewWidth, 20, Text.literal("CopyPreview"));
         copyPreviewField.setEditable(false);
         addDrawableChild(copyPreviewField);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Copy"), b -> copyValuesToClipboard()).dimensions(left + 224, top + row * 22, 50, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Copy"), b -> copyValuesToClipboard())
+                .dimensions(rightX + previewWidth + 4, top + rightRow * 22, rightColWidth - previewWidth - 4, 20)
+                .build());
         refreshCopyPreview();
     }
 

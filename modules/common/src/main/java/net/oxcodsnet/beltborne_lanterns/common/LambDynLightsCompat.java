@@ -1,26 +1,26 @@
-package net.oxcodsnet.beltborne_lanterns.fabric.client;
+package net.oxcodsnet.beltborne_lanterns.common;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.lang.reflect.Method;
 import java.util.function.Function;
+import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 
 /**
  * Handles optional integration with the LambDynamicLights API.
  * Uses reflection so the mod remains fully optional at compile time.
  */
-final class LambDynLightsCompat {
-    private LambDynLightsCompat() {}
+public final class LambDynLightsCompat {
+    public LambDynLightsCompat() {}
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static void init() {
+    public static void init() {
         try {
             Class<?> handlerClass = Class.forName("dev.lambdaurora.lambdynlights.api.DynamicLightHandler");
             Class<?> handlersClass = Class.forName("dev.lambdaurora.lambdynlights.api.DynamicLightHandlers");
 
-            Function<PlayerEntity, Integer> luminance = player ->
-                    BLFabricClient.clientHasLantern(player) ? 15 : 0;
+            Function<PlayerEntity, Integer> luminance = player -> BLClientAbstractions.clientHasLantern(player) ? 15 : 0;
             Function<PlayerEntity, Boolean> waterSensitive = player -> false;
 
             Method makeHandler = handlerClass.getMethod("makeHandler", Function.class, Function.class);

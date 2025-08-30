@@ -2,7 +2,6 @@ package net.oxcodsnet.beltborne_lanterns.neoforge.client;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.entity.player.PlayerEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -13,45 +12,35 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
+import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
-import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
-import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
-import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
+import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
+import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientLogic;
+import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class BLNeoForgeClient {
-    private static final Set<UUID> CLIENT_BELT_PLAYERS = new HashSet<>();
+    // no per-loader state; use common ClientBeltPlayers
 
     private BLNeoForgeClient() {}
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         // Provide platform bridges for common renderer
-        BLClientAbstractions.init(BLNeoForgeClient::clientHasLantern, BLClientAbstractions::isDebugDrawEnabled);
+        BLClientAbstractions.init(ClientBeltPlayers::hasLantern, BLClientAbstractions::isDebugDrawEnabled);
+        LambDynLightsCompat.init();
 
         // Register the config screen with NeoForge's extension point
         ModLoadingContext.get().registerExtensionPoint(
                 IConfigScreenFactory.class,
-                () -> (mc, parent) -> {
-                    // Ensure AutoConfig is registered before opening the screen
-                    BLClientConfigAccess.get();
-                    return me.shedaniel.autoconfig.AutoConfig
-                            .getConfigScreen(BLClientConfig.class, parent)
-                            .get();
-                }
+                () -> (mc, parent) -> LanternClientScreens.openConfig(parent)
         );
-    }
-
-    private static boolean clientHasLantern(PlayerEntity p) {
-        return CLIENT_BELT_PLAYERS.contains(p.getUuid());
     }
 
     @SubscribeEvent
@@ -75,7 +64,7 @@ public final class BLNeoForgeClient {
                 (payload, ctx) -> {
                     UUID uuid = payload.playerUuid();
                     boolean has = payload.hasLantern();
-                    if (has) CLIENT_BELT_PLAYERS.add(uuid); else CLIENT_BELT_PLAYERS.remove(uuid);
+                    ClientBeltPlayers.setHas(uuid, has);
                 }
         );
     }
@@ -99,13 +88,7 @@ public final class BLNeoForgeClient {
                     mc.setScreen(new LanternDebugScreen());
                 }
             }
-            if (mc.world == null) return;
-            float dt = 1f / 20f;
-            for (PlayerEntity p : mc.world.getPlayers()) {
-                if (clientHasLantern(p)) {
-                    LanternSwingManager.tickPlayer(p, dt, BLConfigs.get().rotXDeg);
-                }
-            }
+            LanternClientLogic.tickLanternPhysics(mc);
         }
     }
 }

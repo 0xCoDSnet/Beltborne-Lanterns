@@ -10,6 +10,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
+import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
+import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
 
 /**
  * Server-side interaction + sync logic for NeoForge.
@@ -44,26 +46,25 @@ public final class BLNeoForgeServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayerEntity joining)) return;
         MinecraftServer server = joining.server;
+        // Restore from persistent save and broadcast
+        boolean persisted = BeltLanternSave.get(server).has(joining.getUuid());
+        BeltState.setHasLantern(joining, persisted);
+        BeltNetworking.broadcastBeltState(joining, persisted);
         for (ServerPlayerEntity other : server.getPlayerManager().getPlayerList()) {
             boolean has = BeltState.hasLantern(other);
             BeltNetworking.sendTo(joining, other.getUuid(), has);
         }
     }
 
+    @SubscribeEvent
+    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayerEntity leaving)) return;
+        boolean has = BeltState.hasLantern(leaving);
+        BeltLanternSave.get(leaving.server).set(leaving.getUuid(), has);
+    }
+
     private static void doToggle(ServerPlayerEntity player, ItemStack stackInHand) {
-        boolean has = BeltState.hasLantern(player);
-        if (!has) {
-            if (!player.isCreative()) {
-                stackInHand.decrement(1);
-            }
-            BeltState.setHasLantern(player, true);
-            BeltNetworking.broadcastBeltState(player, true);
-        } else {
-            if (!player.isCreative()) {
-                player.giveItemStack(new ItemStack(Items.LANTERN));
-            }
-            BeltState.setHasLantern(player, false);
-            BeltNetworking.broadcastBeltState(player, false);
-        }
+        boolean nowHas = BeltLanternServer.toggleLantern(player, stackInHand);
+        BeltNetworking.broadcastBeltState(player, nowHas);
     }
 }
