@@ -3,6 +3,7 @@ package net.oxcodsnet.beltborne_lanterns.fabric;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -14,6 +15,7 @@ import net.minecraft.util.TypedActionResult;
 
 import net.oxcodsnet.beltborne_lanterns.ExampleMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
+import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 
 public final class ExampleModFabric implements ModInitializer {
     @Override
@@ -24,6 +26,9 @@ public final class ExampleModFabric implements ModInitializer {
 
         // Run our common setup.
         ExampleMod.init();
+
+        // Register payload type (S2C) for belt sync on server and integrated client
+        PayloadTypeRegistry.playS2C().register(BeltSyncPayload.ID, BeltSyncPayload.CODEC);
 
         // Register shift+right-click with lantern toggle logic (server authoritative)
         UseItemCallback.EVENT.register((player, world, hand) -> toggleLanternOnUse(player, world, hand));
