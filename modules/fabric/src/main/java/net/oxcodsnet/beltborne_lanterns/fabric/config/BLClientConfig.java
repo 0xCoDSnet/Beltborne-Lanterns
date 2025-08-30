@@ -20,6 +20,18 @@ public class BLClientConfig implements ConfigData {
     public int offsetZ100 = -37; // -0.14
 
     @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
+    public int pivotX100 = 0; // local pivot X
+
+    @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
+    public int pivotY100 = 0; // local pivot Y
+
+    @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
+    public int pivotZ100 = 0; // local pivot Z
+
+    @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -360, max = 360)
     public int rotXDeg = 180;
 
@@ -38,6 +50,8 @@ public class BLClientConfig implements ConfigData {
     public float fOffsetX() { return offsetX100 / 100f; }
     public float fOffsetY() { return offsetY100 / 100f; }
     public float fOffsetZ() { return offsetZ100 / 100f; }
+    public float fPivotX()  { return pivotX100 / 100f; }
+    public float fPivotY()  { return pivotY100 / 100f; }
+    public float fPivotZ()  { return pivotZ100 / 100f; }
     public float fScale()   { return scale100 / 100f; }
 }
-

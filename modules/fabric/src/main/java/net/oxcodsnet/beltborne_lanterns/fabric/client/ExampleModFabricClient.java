@@ -26,6 +26,7 @@ public final class ExampleModFabricClient implements ClientModInitializer {
     private static final Set<UUID> CLIENT_BELT_PLAYERS = new HashSet<>();
     private static KeyBinding openConfigKey;
     private static KeyBinding toggleDebugKey;
+    private static KeyBinding openDebugEditorKey;
     private static boolean debugDrawEnabled = false;
 
     public static boolean clientHasLantern(PlayerEntity player) {
@@ -69,6 +70,13 @@ public final class ExampleModFabricClient implements ClientModInitializer {
                 "category.beltborne_lanterns"
         ));
 
+        // Keybind to open lantern debug editor (default: P)
+        openDebugEditorKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.beltborne_lanterns.open_debug",
+                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_P,
+                "category.beltborne_lanterns"
+        ));
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKey.wasPressed()) {
                 if (client.currentScreen == null) {
@@ -79,10 +87,20 @@ public final class ExampleModFabricClient implements ClientModInitializer {
             if (toggleDebugKey.wasPressed()) {
                 debugDrawEnabled = !debugDrawEnabled;
             }
+
+            if (openDebugEditorKey.wasPressed()) {
+                if (client.currentScreen == null) {
+                    client.setScreen(new net.oxcodsnet.beltborne_lanterns.fabric.client.ui.LanternDebugScreen());
+                }
+            }
         });
     }
 
     public static boolean isDebugDrawEnabled() {
         return debugDrawEnabled;
+    }
+
+    public static void setDebugDrawEnabled(boolean enabled) {
+        debugDrawEnabled = enabled;
     }
 }

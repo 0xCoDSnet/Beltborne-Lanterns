@@ -43,6 +43,8 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
 
         // Base offset from config
         Vec3d offset = new Vec3d(cfg.fOffsetX(), cfg.fOffsetY(), cfg.fOffsetZ());
+        // Local pivot (for rotation center)
+        Vec3d pivot = new Vec3d(cfg.fPivotX(), cfg.fPivotY(), cfg.fPivotZ());
 
         // Adjust for player hitbox changes (e.g., crouching)
         double heightDiff = player.getHeight() - 1.8D;
@@ -72,18 +74,27 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
             offset = offset.multiply(0.5D, 1.0D, 0.5D);
         }
 
+        // Apply final transforms: translate to body offset, then rotate around the chosen local pivot
         matrices.translate(offset.x, offset.y, offset.z);
+        // move to pivot, rotate, move back
+        matrices.translate(pivot.x, pivot.y, pivot.z);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(cfg.rotXDeg));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(cfg.rotYDeg));
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(cfg.rotZDeg));
+        matrices.translate(-pivot.x, -pivot.y, -pivot.z);
 
         // Debug gizmos: anchor point + axes at current pivot (local origin)
         if (ExampleModFabricClient.isDebugDrawEnabled()) {
-            drawAxesAndAnchor(matrices, vertexConsumers, 0.3f);
+            // Draw axes at origin (post-offset, pre-rotation) and at pivot for clarity
+            drawAxesAndAnchor(matrices, vertexConsumers, 0.25f);
+            matrices.push();
+            matrices.translate(pivot.x, pivot.y, pivot.z);
+            drawAxesAndAnchor(matrices, vertexConsumers, 0.25f);
+            matrices.pop();
         }
 
         // для перемещения "рендера" ламбы
-        matrices.translate(0.5, 1.0, 0.5);
+        matrices.translate(0,0,0);
 
         float s = cfg.fScale();
         matrices.scale(s, s, s);
