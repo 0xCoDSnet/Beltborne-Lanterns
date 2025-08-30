@@ -211,6 +211,11 @@ public class LanternDebugScreen extends Screen {
     }
 
     @Override
+    protected void applyBlur(float delta){
+
+    }
+
+    @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         // No background dim/blur: keep world fully visible
         super.render(ctx, mouseX, mouseY, delta);

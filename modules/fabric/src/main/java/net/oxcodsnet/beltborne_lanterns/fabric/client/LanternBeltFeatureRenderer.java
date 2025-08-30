@@ -86,7 +86,7 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         // Debug gizmos: anchor point + axes at current pivot (local origin)
         if (ExampleModFabricClient.isDebugDrawEnabled()) {
             // Draw axes at origin (post-offset, pre-rotation) and at pivot for clarity
-            drawAxesAndAnchor(matrices, vertexConsumers, 0.25f);
+            //drawAxesAndAnchor(matrices, vertexConsumers, 0.25f);
             matrices.push();
             matrices.translate(pivot.x, pivot.y, pivot.z);
             drawAxesAndAnchor(matrices, vertexConsumers, 0.25f);
