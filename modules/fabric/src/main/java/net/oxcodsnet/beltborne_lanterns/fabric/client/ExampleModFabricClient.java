@@ -25,6 +25,8 @@ public final class ExampleModFabricClient implements ClientModInitializer {
     // Client-only cache of players who currently have a belt lantern
     private static final Set<UUID> CLIENT_BELT_PLAYERS = new HashSet<>();
     private static KeyBinding openConfigKey;
+    private static KeyBinding toggleDebugKey;
+    private static boolean debugDrawEnabled = false;
 
     public static boolean clientHasLantern(PlayerEntity player) {
         return CLIENT_BELT_PLAYERS.contains(player.getUuid());
@@ -60,12 +62,27 @@ public final class ExampleModFabricClient implements ClientModInitializer {
                 "category.beltborne_lanterns"
         ));
 
+        // Keybind to toggle debug gizmos (default: K)
+        toggleDebugKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.beltborne_lanterns.toggle_debug",
+                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K,
+                "category.beltborne_lanterns"
+        ));
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKey.wasPressed()) {
                 if (client.currentScreen == null) {
                     client.setScreen(AutoConfig.getConfigScreen(BLClientConfig.class, client.currentScreen).get());
                 }
             }
+
+            if (toggleDebugKey.wasPressed()) {
+                debugDrawEnabled = !debugDrawEnabled;
+            }
         });
+    }
+
+    public static boolean isDebugDrawEnabled() {
+        return debugDrawEnabled;
     }
 }

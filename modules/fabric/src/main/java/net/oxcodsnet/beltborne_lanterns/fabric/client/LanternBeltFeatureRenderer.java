@@ -4,7 +4,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
@@ -70,9 +73,23 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         }
 
         matrices.translate(offset.x, offset.y, offset.z);
+
+        // Pivot at top center of the lantern model (in block units)
+        final float px = 0.5f, py = 1.0f, pz = 0.5f;
+        matrices.translate(px, py, pz);
+
+        // Apply rotations around the pivot
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(cfg.rotXDeg));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(cfg.rotYDeg));
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(cfg.rotZDeg));
+
+        // Debug gizmos at the pivot, aligned with local axes (pre-scale)
+        if (ExampleModFabricClient.isDebugDrawEnabled()) {
+            drawAxesAndAnchor(matrices, vertexConsumers, 0.3f);
+        }
+
+        // Translate back from pivot, then scale and render the block
+        matrices.translate(-px, -py, -pz);
         float s = cfg.fScale();
         matrices.scale(s, s, s);
 
@@ -80,5 +97,22 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         brm.renderBlockAsEntity(LANTERN_STATE, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
 
         matrices.pop();
+    }
+
+    private static void drawAxesAndAnchor(MatrixStack matrices, VertexConsumerProvider vertices, float axisLength) {
+        VertexConsumer vc = vertices.getBuffer(RenderLayer.getLines());
+
+        // Anchor: small wireframe cube at origin
+        float c = axisLength * 0.08f;
+        WorldRenderer.drawBox(matrices, vc, -c, -c, -c, c, c, c, 1.0f, 1.0f, 1.0f, 1.0f);
+
+        // Axes as thin wireframe boxes
+        float t = c * 0.4f; // half-thickness
+        // +X axis (red)
+        WorldRenderer.drawBox(matrices, vc, 0.0, -t, -t, axisLength, t, t, 1.0f, 0.25f, 0.25f, 1.0f);
+        // +Y axis (green)
+        WorldRenderer.drawBox(matrices, vc, -t, 0.0, -t, t, axisLength, t, 0.25f, 1.0f, 0.25f, 1.0f);
+        // +Z axis (blue)
+        WorldRenderer.drawBox(matrices, vc, -t, -t, 0.0, t, t, axisLength, 0.25f, 0.5f, 1.0f, 1.0f);
     }
 }
