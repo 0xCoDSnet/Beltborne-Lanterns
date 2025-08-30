@@ -16,7 +16,7 @@ import net.minecraft.util.TypedActionResult;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
-import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
+// no direct config init here; client handles config lazily
 
 public final class BLFabric implements ModInitializer {
     @Override
@@ -28,8 +28,7 @@ public final class BLFabric implements ModInitializer {
         // Run our common setup.
         BLMod.init();
 
-        // Initialize AutoConfig holder (client will also init if needed)
-        try { BLConfigHolder.init(); } catch (Throwable ignored) {}
+        // Config is initialized lazily on the client when accessed.
 
         // Register payload type (S2C) for belt sync on server and integrated client
         PayloadTypeRegistry.playS2C().register(BeltSyncPayload.ID, BeltSyncPayload.CODEC);

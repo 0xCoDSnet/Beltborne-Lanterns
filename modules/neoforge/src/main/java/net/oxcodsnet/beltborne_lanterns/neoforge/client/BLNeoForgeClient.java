@@ -12,6 +12,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
+import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
@@ -30,7 +32,7 @@ public final class BLNeoForgeClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         // Provide platform bridges for common renderer
-        BLClientAbstractions.init(BLNeoForgeClient::clientHasLantern, () -> false);
+        BLClientAbstractions.init(BLNeoForgeClient::clientHasLantern, BLClientAbstractions::isDebugDrawEnabled);
     }
 
     private static boolean clientHasLantern(PlayerEntity p) {
@@ -70,6 +72,18 @@ public final class BLNeoForgeClient {
         @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Post e) {
             MinecraftClient mc = MinecraftClient.getInstance();
+            // Hotkeys (without formal key mapping): L to open config, K toggle debug, P open editor
+            if (mc.currentScreen == null && mc.getWindow() != null) {
+                long win = mc.getWindow().getHandle();
+                // GLFW constants: 76=L, 75=K, 80=P
+                if (org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_L) == org.lwjgl.glfw.GLFW.GLFW_PRESS) {
+                    mc.setScreen(me.shedaniel.autoconfig.AutoConfig.getConfigScreen(BLClientConfig.class, mc.currentScreen).get());
+                } else if (org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_K) == org.lwjgl.glfw.GLFW.GLFW_PRESS) {
+                    BLClientAbstractions.setDebugDrawEnabled(!BLClientAbstractions.isDebugDrawEnabled());
+                } else if (org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_P) == org.lwjgl.glfw.GLFW.GLFW_PRESS) {
+                    mc.setScreen(new LanternDebugScreen());
+                }
+            }
             if (mc.world == null) return;
             float dt = 1f / 20f;
             for (PlayerEntity p : mc.world.getPlayers()) {

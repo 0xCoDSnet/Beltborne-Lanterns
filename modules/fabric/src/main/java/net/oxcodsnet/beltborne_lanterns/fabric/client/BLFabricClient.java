@@ -15,6 +15,7 @@ import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
@@ -82,8 +83,8 @@ public final class BLFabricClient implements ClientModInitializer {
 
         // Wire platform abstractions so common renderer can query state/debug
         BLClientAbstractions.init(
-                (player) -> clientHasLantern(player),
-                () -> isDebugDrawEnabled()
+                BLFabricClient::clientHasLantern,
+                BLClientAbstractions::isDebugDrawEnabled
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -95,11 +96,12 @@ public final class BLFabricClient implements ClientModInitializer {
 
             if (toggleDebugKey.wasPressed()) {
                 debugDrawEnabled = !debugDrawEnabled;
+                BLClientAbstractions.setDebugDrawEnabled(debugDrawEnabled);
             }
 
             if (openDebugEditorKey.wasPressed()) {
                 if (client.currentScreen == null) {
-                    client.setScreen(new net.oxcodsnet.beltborne_lanterns.fabric.client.ui.LanternDebugScreen());
+                    client.setScreen(new net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen());
                 }
             }
 
