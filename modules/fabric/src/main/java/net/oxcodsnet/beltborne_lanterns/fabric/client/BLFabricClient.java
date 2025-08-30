@@ -82,12 +82,16 @@ public final class BLFabricClient implements ClientModInitializer {
             }
 
             if (toggleDebugKey.wasPressed()) {
-                BLClientAbstractions.setDebugDrawEnabled(!BLClientAbstractions.isDebugDrawEnabled());
+                if (net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess.get().debug) {
+                    BLClientAbstractions.setDebugDrawEnabled(!BLClientAbstractions.isDebugDrawEnabled());
+                }
             }
 
             if (openDebugEditorKey.wasPressed()) {
-                if (client.currentScreen == null) {
-                    client.setScreen(new net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen());
+                if (net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess.get().debug) {
+                    if (client.currentScreen == null) {
+                        client.setScreen(new net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen());
+                    }
                 }
             }
 

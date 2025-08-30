@@ -34,7 +34,7 @@ public final class BLNeoForgeClient {
     public static void onClientSetup(FMLClientSetupEvent event) {
         // Provide platform bridges for common renderer
         BLClientAbstractions.init(ClientBeltPlayers::hasLantern, BLClientAbstractions::isDebugDrawEnabled);
-        LambDynLightsCompat.init();
+
 
         // Register the config screen with NeoForge's extension point
         ModLoadingContext.get().registerExtensionPoint(

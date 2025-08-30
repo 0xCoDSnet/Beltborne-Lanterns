@@ -7,6 +7,9 @@ import net.oxcodsnet.beltborne_lanterns.BLMod;
 
 @Config(name = BLMod.MOD_ID)
 public class BLClientConfig implements ConfigData {
+    @ConfigEntry.Gui.Tooltip
+    public boolean debug = false;
+
     // {offset:[-0,25,-0,05,-0,60], pivot:[0,50,0,60,0,50], rot:[180,0,0], scale:0,50}
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
