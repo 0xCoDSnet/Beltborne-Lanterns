@@ -14,6 +14,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
 
 public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
@@ -34,7 +37,39 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
 
         // Apply configurable transforms (AutoConfig-backed)
         var cfg = BLConfigHolder.get();
-        matrices.translate(cfg.fOffsetX(), cfg.fOffsetY(), cfg.fOffsetZ());
+
+        // Base offset from config
+        Vec3d offset = new Vec3d(cfg.fOffsetX(), cfg.fOffsetY(), cfg.fOffsetZ());
+
+        // Adjust for player hitbox changes (e.g., crouching)
+        double heightDiff = player.getHeight() - 1.8D;
+        if (heightDiff != 0.0D) {
+            offset = offset.add(0.0D, heightDiff * 0.5D, 0.0D);
+        }
+
+        // Simple walk swing using limb animation
+        float walkSwing = MathHelper.sin(limbAngle * 0.6662F) * 0.15F * limbDistance;
+        offset = offset.add(0.0D, 0.0D, walkSwing);
+
+        // Vertical bobbing from jumping/falling
+        double vy = player.getVelocity().y;
+        offset = offset.add(0.0D, MathHelper.clamp(vy * 0.1D, -0.15D, 0.15D), 0.0D);
+
+        // Sneaking lowers the lantern slightly
+        if (player.isInSneakingPose()) {
+            offset = offset.add(0.0D, -0.1D, 0.0D);
+        }
+
+        // Prevent clipping through blocks by checking a small AABB at the lantern position
+        Vec3d worldPos = player.getLerpedPos(tickDelta).add(offset);
+        Box lanternBox = new Box(worldPos.x - 0.15D, worldPos.y - 0.2D, worldPos.z - 0.15D,
+                worldPos.x + 0.15D, worldPos.y + 0.3D, worldPos.z + 0.15D);
+        if (!player.getWorld().isSpaceEmpty(player, lanternBox)) {
+            // Push the lantern inward to avoid clipping
+            offset = offset.multiply(0.5D, 1.0D, 0.5D);
+        }
+
+        matrices.translate(offset.x, offset.y, offset.z);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(cfg.rotXDeg));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(cfg.rotYDeg));
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(cfg.rotZDeg));
