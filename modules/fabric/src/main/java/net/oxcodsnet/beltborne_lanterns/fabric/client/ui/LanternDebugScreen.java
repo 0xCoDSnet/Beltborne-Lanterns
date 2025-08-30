@@ -104,15 +104,16 @@ public class LanternDebugScreen extends Screen {
     }
 
     private void resetDefaults() {
+        // {offset:[-0,25,-0,05,-0,60], pivot:[0,50,0,60,0,50], rot:[180,0,0], scale:0,50}
         BLClientConfig cfg = BLConfigHolder.get();
-        cfg.offsetX100 = 0;
-        cfg.offsetY100 = 90;
-        cfg.offsetZ100 = -37;
-        cfg.pivotX100 = 0;
-        cfg.pivotY100 = 0;
-        cfg.pivotZ100 = 0;
+        cfg.offsetX100 = -25;
+        cfg.offsetY100 = -5;
+        cfg.offsetZ100 = -60;
+        cfg.pivotX100 = 50;
+        cfg.pivotY100 = 60;
+        cfg.pivotZ100 = 50;
         cfg.rotXDeg = 180;
-        cfg.rotYDeg = 90;
+        cfg.rotYDeg = 0;
         cfg.rotZDeg = 0;
         cfg.scale100 = 50;
         AutoConfig.getConfigHolder(BLClientConfig.class).save();

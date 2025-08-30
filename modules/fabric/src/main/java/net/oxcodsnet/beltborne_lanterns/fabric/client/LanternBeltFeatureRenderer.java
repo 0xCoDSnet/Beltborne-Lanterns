@@ -17,9 +17,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.oxcodsnet.beltborne_lanterns.fabric.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
 
 public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
@@ -30,77 +28,70 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, T entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void render(
+            MatrixStack matrices,
+            VertexConsumerProvider vertexConsumers,
+            int light,
+            T entity,
+            float limbAngle,
+            float limbDistance,
+            float tickDelta,
+            float animationProgress,
+            float headYaw,
+            float headPitch
+    ) {
+        // Рендерим только для игрока, у которого есть фонарь
         if (!(entity instanceof PlayerEntity player)) return;
         if (!ExampleModFabricClient.clientHasLantern(player)) return;
 
         matrices.push();
-        // Stick to torso rotation
+
+        // 1) Приклеиваемся к торсу
         this.getContextModel().body.rotate(matrices);
 
-        // Apply configurable transforms (AutoConfig-backed)
-        var cfg = BLConfigHolder.get();
+        // 2) Читаем конфиг
+        BLClientConfig c = BLConfigHolder.get();
+        final float offX = c.fOffsetX();
+        final float offY = c.fOffsetY();
+        final float offZ = c.fOffsetZ();
+        final float pivX = c.fPivotX();
+        final float pivY = c.fPivotY();
+        final float pivZ = c.fPivotZ();
+        final float s    = c.fScale();
 
-        // Base offset from config
-        Vec3d offset = new Vec3d(cfg.fOffsetX(), cfg.fOffsetY(), cfg.fOffsetZ());
-        // Local pivot (for rotation center)
-        Vec3d pivot = new Vec3d(cfg.fPivotX(), cfg.fPivotY(), cfg.fPivotZ());
+        // 3) Больше никаких автосмещений/покачиваний — чистая математика
 
-        // Adjust for player hitbox changes (e.g., crouching)
-        double heightDiff = player.getHeight() - 1.8D;
-        if (heightDiff != 0.0D) {
-            offset = offset.add(0.0D, heightDiff * 0.5D, 0.0D);
-        }
+        // 4) Переводим локальную сцену в offset (смещение на поясе)
+        matrices.translate(offX, offY, offZ);
 
-        // Simple walk swing using limb animation
-        float walkSwing = MathHelper.sin(limbAngle * 0.6662F) * 0.15F * limbDistance;
-        offset = offset.add(0.0D, 0.0D, walkSwing);
-
-        // Vertical bobbing from jumping/falling
-        double vy = player.getVelocity().y;
-        offset = offset.add(0.0D, MathHelper.clamp(vy * 0.1D, -0.15D, 0.15D), 0.0D);
-
-        // Sneaking lowers the lantern slightly
-        if (player.isInSneakingPose()) {
-            offset = offset.add(0.0D, -0.1D, 0.0D);
-        }
-
-        // Prevent clipping through blocks by checking a small AABB at the lantern position
-        Vec3d worldPos = player.getLerpedPos(tickDelta).add(offset);
-        Box lanternBox = new Box(worldPos.x - 0.15D, worldPos.y - 0.2D, worldPos.z - 0.15D,
-                worldPos.x + 0.15D, worldPos.y + 0.3D, worldPos.z + 0.15D);
-        if (!player.getWorld().isSpaceEmpty(player, lanternBox)) {
-            // Push the lantern inward to avoid clipping
-            offset = offset.multiply(0.5D, 1.0D, 0.5D);
-        }
-
-        // Apply final transforms: translate to body offset, then rotate around the chosen local pivot
-        matrices.translate(offset.x, offset.y, offset.z);
-        // move to pivot, rotate, move back
-        matrices.translate(pivot.x, pivot.y, pivot.z);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(cfg.rotXDeg));
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(cfg.rotYDeg));
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(cfg.rotZDeg));
-        matrices.translate(-pivot.x, -pivot.y, -pivot.z);
-
-        // Debug gizmos: anchor point + axes at current pivot (local origin)
+        // 5) Рисуем гизмо ТОЛЬКО в pivot (если включён дебаг)
         if (ExampleModFabricClient.isDebugDrawEnabled()) {
-            // Draw axes at origin (post-offset, pre-rotation) and at pivot for clarity
-            //drawAxesAndAnchor(matrices, vertexConsumers, 0.25f);
             matrices.push();
-            matrices.translate(pivot.x, pivot.y, pivot.z);
+            matrices.translate(pivX, pivY, pivZ);
             drawAxesAndAnchor(matrices, vertexConsumers, 0.25f);
             matrices.pop();
         }
 
-        // для перемещения "рендера" ламбы
-        matrices.translate(0,0,0);
+        // 6) «бутерброд» вокруг pivot: туда → scale/rotate → обратно
+        matrices.translate(pivX, pivY, pivZ);
 
-        float s = cfg.fScale();
+        // базовый поворот: блок «смотрит» корректно относительно торса
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f));
+
+        // масштаб вокруг якоря
         matrices.scale(s, s, s);
 
+        // пользовательские углы
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(c.rotXDeg));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(c.rotYDeg));
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(c.rotZDeg));
+
+        matrices.translate(-pivX, -pivY, -pivZ);
+
+        // 7) Рендер фонаря как сущности блока
         BlockRenderManager brm = MinecraftClient.getInstance().getBlockRenderManager();
-        brm.renderBlockAsEntity(LANTERN_STATE, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
+        BlockState state = Blocks.LANTERN.getDefaultState(); // или свой BlockState при необходимости
+        brm.renderBlockAsEntity(state, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
 
         matrices.pop();
     }

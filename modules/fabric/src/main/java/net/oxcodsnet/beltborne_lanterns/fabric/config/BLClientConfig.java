@@ -7,33 +7,34 @@ import net.oxcodsnet.beltborne_lanterns.ExampleMod;
 
 @Config(name = ExampleMod.MOD_ID)
 public class BLClientConfig implements ConfigData {
+    // {offset:[-0,25,-0,05,-0,60], pivot:[0,50,0,60,0,50], rot:[180,0,0], scale:0,50}
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
-    public int offsetX100 = 0; // 0
+    public int offsetX100 = -25; // 0
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
-    public int offsetY100 = 90; // 90
+    public int offsetY100 = -5; // 90
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
-    public int offsetZ100 = -37; // -37
+    public int offsetZ100 = -60; // -37
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
-    public int pivotX100 = 0; // local pivot X
+    public int pivotX100 = 50; // local pivot X
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
-    public int pivotY100 = 0; // local pivot Y
+    public int pivotY100 = 60; // local pivot Y
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -200, max = 200)
-    public int pivotZ100 = 0; // local pivot Z
+    public int pivotZ100 = 50; // local pivot Z
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -360, max = 360)
-    public int rotXDeg = 0; //
+    public int rotXDeg = 180; //
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = -360, max = 360)
@@ -45,7 +46,7 @@ public class BLClientConfig implements ConfigData {
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.BoundedDiscrete(min = 25, max = 100)
-    public int scale100 = 100; // 1
+    public int scale100 = 50; // 1
 
     public float fOffsetX() { return offsetX100 / 100f; }
     public float fOffsetY() { return offsetY100 / 100f; }
