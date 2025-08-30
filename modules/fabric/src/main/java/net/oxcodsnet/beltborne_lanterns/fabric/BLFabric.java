@@ -66,7 +66,8 @@ public final class BLFabric implements ModInitializer {
         ItemStack stack = player.getStackInHand(hand);
         if (world.isClient()) return TypedActionResult.pass(stack);
         if (!player.isSneaking()) return TypedActionResult.pass(stack);
-        if (!stack.isOf(Items.LANTERN)) return TypedActionResult.pass(stack);
+        boolean hasLantern = BeltState.hasLantern(player);
+        if (!hasLantern && !stack.isOf(Items.LANTERN)) return TypedActionResult.pass(stack);
         doToggle((ServerPlayerEntity) player, stack);
         return TypedActionResult.success(stack, world.isClient());
     }
@@ -75,7 +76,8 @@ public final class BLFabric implements ModInitializer {
         ItemStack stack = player.getStackInHand(hand);
         if (world.isClient()) return net.minecraft.util.ActionResult.PASS;
         if (!player.isSneaking()) return net.minecraft.util.ActionResult.PASS;
-        if (!stack.isOf(Items.LANTERN)) return net.minecraft.util.ActionResult.PASS;
+        boolean hasLantern = BeltState.hasLantern(player);
+        if (!hasLantern && !stack.isOf(Items.LANTERN)) return net.minecraft.util.ActionResult.PASS;
         doToggle((ServerPlayerEntity) player, stack);
         return net.minecraft.util.ActionResult.SUCCESS;
     }

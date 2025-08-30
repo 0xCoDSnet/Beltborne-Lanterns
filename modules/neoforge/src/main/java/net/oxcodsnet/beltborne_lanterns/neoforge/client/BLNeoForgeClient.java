@@ -1,26 +1,29 @@
 package net.oxcodsnet.beltborne_lanterns.neoforge.client;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.util.InputUtil;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
-import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
-import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
-import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
-import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
+import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientLogic;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
+import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
+import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 
 import java.util.UUID;
 
@@ -29,6 +32,11 @@ public final class BLNeoForgeClient {
     // no per-loader state; use common ClientBeltPlayers
 
     private BLNeoForgeClient() {}
+
+    // Keybindings
+    private static KeyBinding openConfigKey;
+    private static KeyBinding toggleDebugKey;
+    private static KeyBinding openDebugEditorKey;
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
@@ -41,6 +49,28 @@ public final class BLNeoForgeClient {
                 IConfigScreenFactory.class,
                 () -> (mc, parent) -> LanternClientScreens.openConfig(parent)
         );
+    }
+
+    @SubscribeEvent
+    public static void registerKeys(RegisterKeyMappingsEvent event) {
+        openConfigKey = new KeyBinding(
+                "key.beltborne_lanterns.open_config",
+                InputUtil.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_L,
+                "category.beltborne_lanterns"
+        );
+        toggleDebugKey = new KeyBinding(
+                "key.beltborne_lanterns.toggle_debug",
+                InputUtil.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_K,
+                "category.beltborne_lanterns"
+        );
+        openDebugEditorKey = new KeyBinding(
+                "key.beltborne_lanterns.open_debug",
+                InputUtil.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_P,
+                "category.beltborne_lanterns"
+        );
+        event.register(openConfigKey);
+        event.register(toggleDebugKey);
+        event.register(openDebugEditorKey);
     }
 
     @SubscribeEvent
@@ -76,18 +106,26 @@ public final class BLNeoForgeClient {
         @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Post e) {
             MinecraftClient mc = MinecraftClient.getInstance();
-            // Hotkeys (without formal key mapping): L to open config, K toggle debug, P open editor
-            if (mc.currentScreen == null && mc.getWindow() != null) {
-                long win = mc.getWindow().getHandle();
-                // GLFW constants: 76=L, 75=K, 80=P
-                if (org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_L) == org.lwjgl.glfw.GLFW.GLFW_PRESS) {
-                    mc.setScreen(me.shedaniel.autoconfig.AutoConfig.getConfigScreen(BLClientConfig.class, mc.currentScreen).get());
-                } else if (org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_K) == org.lwjgl.glfw.GLFW.GLFW_PRESS) {
-                    BLClientAbstractions.setDebugDrawEnabled(!BLClientAbstractions.isDebugDrawEnabled());
-                } else if (org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_P) == org.lwjgl.glfw.GLFW.GLFW_PRESS) {
-                    mc.setScreen(new LanternDebugScreen());
+            if (openConfigKey != null && openConfigKey.wasPressed()) {
+                if (mc.currentScreen == null) {
+                    mc.setScreen(LanternClientScreens.openConfig(mc.currentScreen));
                 }
             }
+
+            if (toggleDebugKey != null && toggleDebugKey.wasPressed()) {
+                if (BLClientConfigAccess.get().debug) {
+                    BLClientAbstractions.setDebugDrawEnabled(!BLClientAbstractions.isDebugDrawEnabled());
+                }
+            }
+
+            if (openDebugEditorKey != null && openDebugEditorKey.wasPressed()) {
+                if (BLClientConfigAccess.get().debug) {
+                    if (mc.currentScreen == null) {
+                        mc.setScreen(new LanternDebugScreen());
+                    }
+                }
+            }
+
             LanternClientLogic.tickLanternPhysics(mc);
         }
     }

@@ -25,7 +25,8 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity player)) return;
         ItemStack stack = player.getStackInHand(event.getHand());
         if (!player.isSneaking()) return;
-        if (!stack.isOf(Items.LANTERN)) return;
+        boolean hasLantern = BeltState.hasLantern(player);
+        if (!hasLantern && !stack.isOf(Items.LANTERN)) return;
         doToggle(player, stack);
         event.setCancellationResult(net.minecraft.util.ActionResult.SUCCESS);
         event.setCanceled(true);
@@ -36,7 +37,8 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity player)) return;
         ItemStack stack = player.getStackInHand(event.getHand());
         if (!player.isSneaking()) return;
-        if (!stack.isOf(Items.LANTERN)) return;
+        boolean hasLantern = BeltState.hasLantern(player);
+        if (!hasLantern && !stack.isOf(Items.LANTERN)) return;
         doToggle(player, stack);
         event.setCancellationResult(net.minecraft.util.ActionResult.SUCCESS);
         event.setCanceled(true);
