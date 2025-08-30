@@ -3,6 +3,7 @@ package net.oxcodsnet.beltborne_lanterns.fabric.client.physics;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
+import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
 
 import java.util.Map;
 import java.util.UUID;
@@ -18,16 +19,20 @@ public final class LanternSwingManager {
     private static final float DEFAULT_ZETA  = 0.42f; // damping ratio
 
     // Coupling gains → forcing (rad/s^2)
-    private static final float K_YAW = 2.0f;         // yaw rate -> lateral sway (Z axis)
-    private static final float K_HSPEED = 0.0f;      // not used for now (could lean with speed)
-    private static final float K_HACCEL = 1.3f;      // forward accel -> fore-aft sway (X axis)
-    private static final float K_YACCEL = 0.25f;     // vertical accel -> small extra fore-aft
+    private static final float K_YAW = 3.2f;         // yaw rate -> lateral sway (Z axis)
+    private static final float K_HSPEED = 0.20f;     // small forward lean with speed
+    private static final float K_HACCEL = 1.7f;      // forward accel -> fore-aft sway (X axis)
+    private static final float K_YACCEL = 0.30f;     // vertical accel -> small extra fore-aft
+    private static final float K_STRAFE_A = 1.4f;    // strafe accel -> lateral sway
+    private static final float K_STRAFE_V = 0.25f;   // strafe speed -> constant slight lean
 
     // Impulses (rad/s)
-    private static final float IMPULSE_JUMP_X = -1.2f; // tilt backwards on jump
-    private static final float IMPULSE_LAND_X = +1.6f; // kick forwards on landing
+    private static final float IMPULSE_JUMP_X = -1.3f; // tilt backwards on jump
+    private static final float IMPULSE_LAND_X = +1.8f; // kick forwards on landing
     private static final float IMPULSE_CROUCH_X = +0.6f; // small forward dip on crouch
     private static final float IMPULSE_UNCROUCH_X = -0.4f; // small recovery on release
+    private static final float IMPULSE_START_MOVE_X = -0.7f; // when starting to move: slight back
+    private static final float IMPULSE_STOP_MOVE_X  = +0.5f; // when stopping: slight forward
 
     // Per-player state
     private static final Map<UUID, LanternSwingState> STATES = new ConcurrentHashMap<>();
@@ -50,10 +55,12 @@ public final class LanternSwingManager {
         float yawRateDegPerSec = wrapDegrees(yaw - kin.prevYaw) / Math.max(dtSec, 1e-4f);
         float yawRateRadPerSec = (float) Math.toRadians(yawRateDegPerSec);
 
-        // Horizontal speed and accel (blocks/s)
-        double vx = p.getVelocity().x; // units are ~blocks/tick; multiply by 20 to get per second
+        // Velocity components
+        double vx = p.getVelocity().x; // blocks/tick
         double vz = p.getVelocity().z;
         double vy = p.getVelocity().y;
+
+        // Convert to per-second scales where needed
         double hSpeedPerSec = Math.hypot(vx, vz) * 20.0;
         double prevHSpeedPerSec = kin.prevHSpeedPerSec;
         double hAccel = (hSpeedPerSec - prevHSpeedPerSec) / Math.max(dtSec, 1e-4);
@@ -61,15 +68,31 @@ public final class LanternSwingManager {
         // Vertical acceleration (approx)
         double yAcc = (vy - kin.prevYVel) * 20.0 / Math.max(dtSec, 1e-4);
 
+        // Local frame (relative to player yaw) for forward/strafe components
+        float yawRad = (float) Math.toRadians(yaw);
+        double fwdX = -Math.sin(yawRad); // forward unit vector (x)
+        double fwdZ =  Math.cos(yawRad); // forward unit vector (z)
+        double rightX =  Math.cos(yawRad); // right unit vector (x)
+        double rightZ =  Math.sin(yawRad); // right unit vector (z)
+
+        double vFwd = vx * fwdX + vz * fwdZ;      // blocks/tick
+        double vRight = vx * rightX + vz * rightZ; // blocks/tick
+        double vFwdPerSec = vFwd * 20.0;
+        double vRightPerSec = vRight * 20.0;
+        double aFwd = (vFwdPerSec - kin.prevVFwdPerSec) / Math.max(dtSec, 1e-4);
+        double aRight = (vRightPerSec - kin.prevVRightPerSec) / Math.max(dtSec, 1e-4);
+
         // Build forcing
-        float uZ = K_YAW * yawRateRadPerSec;
-        float uX = (float) (K_HSPEED * hSpeedPerSec + K_HACCEL * hAccel + K_YACCEL * yAcc);
+        float uZ = (float) (K_YAW * yawRateRadPerSec + K_STRAFE_A * aRight + K_STRAFE_V * vRightPerSec);
+        float uX = (float) (K_HSPEED * vFwdPerSec + K_HACCEL * aFwd + K_YACCEL * yAcc);
 
         // Impulses: jump/land/crouch transitions
         boolean onGround = p.isOnGround();
         boolean wasOnGround = kin.prevOnGround;
         boolean sneaking = p.isSneaking();
         boolean wasSneaking = kin.prevSneaking;
+        boolean moving = hSpeedPerSec > 0.08 * 20.0; // threshold in per-second units
+        boolean wasMoving = kin.prevMoving;
 
         if (wasOnGround && !onGround && vy > 0.08) {
             // Jumped
@@ -84,6 +107,19 @@ public final class LanternSwingManager {
         } else if (wasSneaking && !sneaking) {
             state.impulseX(IMPULSE_UNCROUCH_X);
         }
+        if (!wasMoving && moving) {
+            state.impulseX(IMPULSE_START_MOVE_X);
+        } else if (wasMoving && !moving) {
+            state.impulseX(IMPULSE_STOP_MOVE_X);
+        }
+
+        // Smooth target base X (sneak pose) — approach towards 215° or config rotX
+        float targetBaseX = sneaking ? 215f : BLConfigHolder.get().rotXDeg;
+        if (!kin.baseInit) {
+            kin.baseXDegSmoothed = targetBaseX;
+            kin.baseInit = true;
+        }
+        kin.baseXDegSmoothed = approachExp(kin.baseXDegSmoothed, targetBaseX, dtSec, 0.15f);
 
         // Integrate
         state.step(dtSec, uX, uZ);
@@ -94,6 +130,9 @@ public final class LanternSwingManager {
         kin.prevYVel = vy;
         kin.prevOnGround = onGround;
         kin.prevSneaking = sneaking;
+        kin.prevVFwdPerSec = vFwdPerSec;
+        kin.prevVRightPerSec = vRightPerSec;
+        kin.prevMoving = moving;
 
         KIN.put(id, kin);
         STATES.put(id, state);
@@ -107,8 +146,21 @@ public final class LanternSwingManager {
         return STATES.getOrDefault(id, new LanternSwingState(DEFAULT_OMEGA, DEFAULT_ZETA)).getZDeg();
     }
 
+    public static float getBaseXDeg(UUID id) {
+        Kinematics k = KIN.get(id);
+        if (k == null) return BLConfigHolder.get().rotXDeg;
+        return k.baseXDegSmoothed;
+    }
+
     private static float wrapDegrees(float deg) {
         return MathHelper.wrapDegrees(deg);
+    }
+
+    private static float approachExp(float current, float target, float dtSec, float tauSec) {
+        if (tauSec <= 0f) return target;
+        float a = 1f - (float) Math.exp(-dtSec / tauSec);
+        if (a < 0f) a = 0f; else if (a > 1f) a = 1f;
+        return current + (target - current) * a;
     }
 
     private static final class Kinematics {
@@ -117,6 +169,10 @@ public final class LanternSwingManager {
         double prevYVel = 0.0;           // blocks/tick
         boolean prevOnGround = false;
         boolean prevSneaking = false;
+        double prevVFwdPerSec = 0.0;
+        double prevVRightPerSec = 0.0;
+        boolean prevMoving = false;
+        float baseXDegSmoothed = 0f;     // smoothed base X for crouch blending
+        boolean baseInit = false;
     }
 }
-

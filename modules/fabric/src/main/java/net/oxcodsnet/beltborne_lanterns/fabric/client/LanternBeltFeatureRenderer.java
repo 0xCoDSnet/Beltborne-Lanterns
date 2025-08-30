@@ -85,7 +85,9 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         // Базовые пользовательские углы + «живое» качание из пружинно-демпферной модели
         float dynX = LanternSwingManager.getXDeg(player.getUuid());
         float dynZ = LanternSwingManager.getZDeg(player.getUuid());
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(c.rotXDeg + dynX));
+        // Плавный базовый X (с учётом приседа) берём из менеджера физики
+        float baseX = LanternSwingManager.getBaseXDeg(player.getUuid());
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(baseX + dynX));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(c.rotYDeg));
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(c.rotZDeg + dynZ));
 
