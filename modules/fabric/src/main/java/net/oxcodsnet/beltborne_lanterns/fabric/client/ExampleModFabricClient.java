@@ -36,7 +36,7 @@ public final class ExampleModFabricClient implements ClientModInitializer {
         // Register a feature renderer for players to draw the lantern on the belt
         LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
             if (entityType == EntityType.PLAYER) {
-                helper.register(new LanternBeltFeatureRenderer(renderer, context.getItemRenderer()));
+                helper.register(new LanternBeltFeatureRenderer(renderer));
             }
         });
     }

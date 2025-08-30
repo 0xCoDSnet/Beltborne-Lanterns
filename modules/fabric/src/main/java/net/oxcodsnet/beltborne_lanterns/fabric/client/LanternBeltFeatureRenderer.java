@@ -1,30 +1,25 @@
 package net.oxcodsnet.beltborne_lanterns.fabric.client;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.render.item.HeldItemRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.world.World;
-
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 
 public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
-    private static final ItemStack LANTERN_STACK = new ItemStack(Items.LANTERN);
-    private final ItemRenderer itemRenderer;
+    private static final BlockState LANTERN_STATE = Blocks.LANTERN.getDefaultState().with(Properties.HANGING, false);
 
-    public LanternBeltFeatureRenderer(FeatureRendererContext<T, M> context, ItemRenderer itemRenderer) {
+    public LanternBeltFeatureRenderer(FeatureRendererContext<T, M> context) {
         super(context);
-        this.itemRenderer = itemRenderer;
     }
 
     @Override
@@ -34,18 +29,20 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         if (!ExampleModFabricClient.clientHasLantern(player)) return;
 
         matrices.push();
-        // Rotate with the body so it sticks to the torso
+        // Stick to torso rotation
         this.getContextModel().body.rotate(matrices);
 
-        // Position on the right hip area (tweak as needed)
-        matrices.translate(0.25F, 0.9F, -0.15F);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90f));
-        matrices.scale(0.8F, 0.8F, 0.8F);
+        // Right hip position; tweak as needed
+        matrices.translate(0.26F, 0.92F, -0.14F);
 
-        // Render as fixed/ground-like item
-        this.itemRenderer.renderItem(LANTERN_STACK, ModelTransformationMode.FIXED, light, 0, matrices, vertexConsumers, entity.getWorld(), entity.getId());
+        // Orient upright and slightly facing outward
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90f));
+        matrices.scale(0.75F, 0.75F, 0.75F);
+
+        BlockRenderManager brm = MinecraftClient.getInstance().getBlockRenderManager();
+        brm.renderBlockAsEntity(LANTERN_STATE, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
 
         matrices.pop();
     }
 }
-
