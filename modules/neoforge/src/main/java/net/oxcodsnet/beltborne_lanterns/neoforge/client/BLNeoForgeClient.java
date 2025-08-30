@@ -39,25 +39,27 @@ public final class BLNeoForgeClient {
 
     @SubscribeEvent
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
-        // Add our belt lantern feature to player renderers (both skins)
-        PlayerEntityRenderer defaultSkin = event.getSkin("default");
-        PlayerEntityRenderer slimSkin = event.getSkin("slim");
-        if (defaultSkin != null) defaultSkin.addFeature(new LanternBeltFeatureRenderer<>(defaultSkin));
-        if (slimSkin != null) slimSkin.addFeature(new LanternBeltFeatureRenderer<>(slimSkin));
+        // Add our belt lantern feature to all available player skins
+        for (var skin : event.getSkins()) {
+            var renderer = event.getSkin(skin);
+            if (renderer instanceof PlayerEntityRenderer per) {
+                per.addFeature(new LanternBeltFeatureRenderer<>(per));
+            }
+        }
     }
 
     @SubscribeEvent
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         // Register S2C payload for syncing which players have a belt lantern
-        var registrar = event.registrar(BLMod.MOD_ID);
+        var registrar = event.registrar("1"); // network version
         registrar.playToClient(
                 BeltSyncPayload.ID,
                 BeltSyncPayload.CODEC,
-                (payload, ctx) -> ctx.workHandler().submit(() -> {
+                (payload, ctx) -> {
                     UUID uuid = payload.playerUuid();
                     boolean has = payload.hasLantern();
                     if (has) CLIENT_BELT_PLAYERS.add(uuid); else CLIENT_BELT_PLAYERS.remove(uuid);
-                })
+                }
         );
     }
 
@@ -78,4 +80,3 @@ public final class BLNeoForgeClient {
         }
     }
 }
-

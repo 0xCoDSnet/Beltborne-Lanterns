@@ -3,6 +3,7 @@ package net.oxcodsnet.beltborne_lanterns.fabric.config;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
+import net.minecraft.util.ActionResult;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfig;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
@@ -21,7 +22,7 @@ public final class BLConfigHolder {
         // Keep common snapshot synced on save
         HOLDER.registerSaveListener((h, cfg) -> {
             BLConfigs.set(copyToCommon(cfg));
-            return me.shedaniel.autoconfig.ConfigData.saveAll(true);
+            return ActionResult.SUCCESS;
         });
     }
 
