@@ -15,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.oxcodsnet.beltborne_lanterns.fabric.config.BLClientConfig;
+import net.oxcodsnet.beltborne_lanterns.fabric.client.physics.LanternSwingManager;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashSet;
@@ -91,6 +92,16 @@ public final class ExampleModFabricClient implements ClientModInitializer {
             if (openDebugEditorKey.wasPressed()) {
                 if (client.currentScreen == null) {
                     client.setScreen(new net.oxcodsnet.beltborne_lanterns.fabric.client.ui.LanternDebugScreen());
+                }
+            }
+
+            // Update lantern physics states for players who have a belt lantern
+            if (client.world != null) {
+                final float dt = 1.0f / 20.0f;
+                for (PlayerEntity p : client.world.getPlayers()) {
+                    if (clientHasLantern(p)) {
+                        LanternSwingManager.tickPlayer(p, dt);
+                    }
                 }
             }
         });

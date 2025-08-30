@@ -19,6 +19,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
 import net.oxcodsnet.beltborne_lanterns.fabric.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
+import net.oxcodsnet.beltborne_lanterns.fabric.client.physics.LanternSwingManager;
 
 public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
     private static final BlockState LANTERN_STATE = Blocks.LANTERN.getDefaultState().with(Properties.HANGING, false);
@@ -81,10 +82,12 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         // масштаб вокруг якоря
         matrices.scale(s, s, s);
 
-        // пользовательские углы
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(c.rotXDeg));
+        // Базовые пользовательские углы + «живое» качание из пружинно-демпферной модели
+        float dynX = LanternSwingManager.getXDeg(player.getUuid());
+        float dynZ = LanternSwingManager.getZDeg(player.getUuid());
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(c.rotXDeg + dynX));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(c.rotYDeg));
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(c.rotZDeg));
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(c.rotZDeg + dynZ));
 
         matrices.translate(-pivX, -pivY, -pivZ);
 
