@@ -73,23 +73,15 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         }
 
         matrices.translate(offset.x, offset.y, offset.z);
-
-        // Pivot at top center of the lantern model (in block units)
-        final float px = 0.5f, py = 1.0f, pz = 0.5f;
-        matrices.translate(px, py, pz);
-
-        // Apply rotations around the pivot
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(cfg.rotXDeg));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(cfg.rotYDeg));
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(cfg.rotZDeg));
 
-        // Debug gizmos at the pivot, aligned with local axes (pre-scale)
+        // Debug gizmos: anchor point + axes at current pivot (local origin)
         if (ExampleModFabricClient.isDebugDrawEnabled()) {
             drawAxesAndAnchor(matrices, vertexConsumers, 0.3f);
         }
 
-        // Translate back from pivot, then scale and render the block
-        matrices.translate(-px, -py, -pz);
         float s = cfg.fScale();
         matrices.scale(s, s, s);
 
@@ -106,7 +98,7 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         float c = axisLength * 0.08f;
         WorldRenderer.drawBox(matrices, vc, -c, -c, -c, c, c, c, 1.0f, 1.0f, 1.0f, 1.0f);
 
-        // Axes as thin wireframe boxes
+        // Axes as thin wireframe boxes from origin
         float t = c * 0.4f; // half-thickness
         // +X axis (red)
         WorldRenderer.drawBox(matrices, vc, 0.0, -t, -t, axisLength, t, t, 1.0f, 0.25f, 0.25f, 1.0f);
