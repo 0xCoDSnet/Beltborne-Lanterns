@@ -16,6 +16,7 @@ import net.minecraft.util.TypedActionResult;
 import net.oxcodsnet.beltborne_lanterns.ExampleMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.fabric.config.BLConfigHolder;
 
 public final class ExampleModFabric implements ModInitializer {
     @Override
@@ -26,6 +27,9 @@ public final class ExampleModFabric implements ModInitializer {
 
         // Run our common setup.
         ExampleMod.init();
+
+        // Initialize AutoConfig holder (client will also init if needed)
+        try { BLConfigHolder.init(); } catch (Throwable ignored) {}
 
         // Register payload type (S2C) for belt sync on server and integrated client
         PayloadTypeRegistry.playS2C().register(BeltSyncPayload.ID, BeltSyncPayload.CODEC);

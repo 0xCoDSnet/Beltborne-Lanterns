@@ -35,6 +35,13 @@ dependencies {
 
     common(project(path: ':modules:common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionFabric')
+
+    // Cloth Config (client-side config UI)
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:15.0.127"
+}
+
+repositories {
+    maven { url = 'https://maven.shedaniel.me/' }
 }
 
 processResources {
