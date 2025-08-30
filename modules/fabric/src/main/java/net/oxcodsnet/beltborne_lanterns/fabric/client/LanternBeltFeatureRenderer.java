@@ -82,6 +82,9 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
             drawAxesAndAnchor(matrices, vertexConsumers, 0.3f);
         }
 
+        // для перемещения "рендера" ламбы
+        matrices.translate(0.5, 1.0, 0.5);
+
         float s = cfg.fScale();
         matrices.scale(s, s, s);
 
