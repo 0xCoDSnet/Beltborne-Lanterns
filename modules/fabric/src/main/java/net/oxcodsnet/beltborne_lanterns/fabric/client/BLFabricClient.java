@@ -53,13 +53,10 @@ public final class BLFabricClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(LampConfigSyncPayload.ID, (payload, context) -> {
             MinecraftClient client = MinecraftClient.getInstance();
             client.execute(() -> {
-                var lampCfg = BLLampConfigAccess.get();
-                lampCfg.extraLampLight.clear();
-                payload.lamps().forEach((id, lum) -> lampCfg.extraLampLight.put(id.toString(), lum));
                 var cliCfg = BLClientConfigAccess.get();
                 cliCfg.extraLampLight.clear();
                 payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.put(id.toString(), lum));
-                LampRegistry.init();
+                BLClientConfigAccess.save();
             });
         });
 

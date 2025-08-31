@@ -120,13 +120,12 @@ public final class BLNeoForgeClient {
                 LampConfigSyncPayload.ID,
                 LampConfigSyncPayload.CODEC,
                 (payload, ctx) -> {
-                    var lampCfg = BLLampConfigAccess.get();
-                    lampCfg.extraLampLight.clear();
-                    payload.lamps().forEach((id, lum) -> lampCfg.extraLampLight.put(id.toString(), lum));
-                    var cliCfg = BLClientConfigAccess.get();
-                    cliCfg.extraLampLight.clear();
-                    payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.put(id.toString(), lum));
-                    LampRegistry.init();
+                    ctx.enqueueWork(() -> {
+                        var cliCfg = BLClientConfigAccess.get();
+                        cliCfg.extraLampLight.clear();
+                        payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.put(id.toString(), lum));
+                        BLClientConfigAccess.save();
+                    });
                 }
         );
         registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
