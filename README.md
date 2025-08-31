@@ -53,17 +53,17 @@ Need it back in your hands? Press **B** again. 💡
 
 <table>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo1.gif" alt="demo 1" width="430"></td>
-    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo2.gif" alt="demo 2" width="430"></td>
+    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo1.gif" alt="demo 1" width="300"></td>
+    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo2.gif" alt="demo 2" width="300"></td>
   
   </tr>
   <tr>
-     <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo3.gif" alt="demo 3" width="430"></td>
-     <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo4.gif" alt="demo 4" width="430"></td>
+     <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo3.gif" alt="demo 3" width="300"></td>
+     <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo4.gif" alt="demo 4" width="300"></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo5.gif" alt="demo 5" width="430"></td>
-    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo6.gif" alt="demo 6" width="430"></td>
+    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo5.gif" alt="demo 5" width="300"></td>
+    <td><img src="https://raw.githubusercontent.com/0xCoDSnet/Beltborne-Lanterns/refs/heads/1.21-architectury-loom/demo/demo6.gif" alt="demo 6" width="300"></td>
   </tr>
 </table>
 
