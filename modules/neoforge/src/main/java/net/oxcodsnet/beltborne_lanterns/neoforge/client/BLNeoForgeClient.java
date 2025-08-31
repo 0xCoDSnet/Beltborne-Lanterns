@@ -27,6 +27,9 @@ import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
+
 import java.util.UUID;
 
 @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
@@ -44,7 +47,7 @@ public final class BLNeoForgeClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         // Provide platform bridges for common renderer
-        BLClientAbstractions.init(ClientBeltPlayers::hasLantern, BLClientAbstractions::isDebugDrawEnabled);
+        BLClientAbstractions.init(ClientBeltPlayers::getLamp, BLClientAbstractions::isDebugDrawEnabled);
 
 
         // Register the config screen with NeoForge's extension point
@@ -102,8 +105,8 @@ public final class BLNeoForgeClient {
                 BeltSyncPayload.CODEC,
                 (payload, ctx) -> {
                     UUID uuid = payload.playerUuid();
-                    boolean has = payload.hasLantern();
-                    ClientBeltPlayers.setHas(uuid, has);
+                    Item lamp = payload.lampId() != null ? Registries.ITEM.get(payload.lampId()) : null;
+                    ClientBeltPlayers.setLamp(uuid, lamp);
                 }
         );
         registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });

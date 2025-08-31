@@ -2,14 +2,15 @@ package net.oxcodsnet.beltborne_lanterns.common.persistence;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
+import net.minecraft.item.Item;
 import net.minecraft.world.PersistentState;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -20,7 +21,7 @@ public final class BeltLanternSave extends PersistentState {
     private static final String SAVE_NAME = "beltborne_lanterns_belts";
     private static final String PLAYERS_KEY = "players";
 
-    private final Set<UUID> playersWithLantern = new HashSet<>();
+    private final Map<UUID, Identifier> playersWithLamps = new HashMap<>();
 
     private static final PersistentState.Type<BeltLanternSave> TYPE = new PersistentState.Type<>(
             BeltLanternSave::new,
@@ -34,20 +35,37 @@ public final class BeltLanternSave extends PersistentState {
     }
 
     public boolean has(UUID uuid) {
-        return playersWithLantern.contains(uuid);
+        return playersWithLamps.containsKey(uuid);
     }
 
-    public void set(UUID uuid, boolean has) {
-        if (has) playersWithLantern.add(uuid); else playersWithLantern.remove(uuid);
+    public Identifier getId(UUID uuid) {
+        return playersWithLamps.get(uuid);
+    }
+
+    public Item get(UUID uuid) {
+        Identifier id = getId(uuid);
+        return id != null ? Registries.ITEM.get(id) : null;
+    }
+
+    public void set(UUID uuid, Item lamp) {
+        if (lamp != null) {
+            playersWithLamps.put(uuid, Registries.ITEM.getId(lamp));
+        } else {
+            playersWithLamps.remove(uuid);
+        }
         markDirty();
     }
 
     public static BeltLanternSave fromNbt(NbtCompound nbt) {
         BeltLanternSave save = new BeltLanternSave();
-        NbtList list = nbt.getList(PLAYERS_KEY, NbtElement.STRING_TYPE);
-        for (int i = 0; i < list.size(); i++) {
+        NbtCompound map = nbt.getCompound(PLAYERS_KEY);
+        for (String key : map.getKeys()) {
             try {
-                save.playersWithLantern.add(UUID.fromString(list.getString(i)));
+                UUID uuid = UUID.fromString(key);
+                Identifier id = Identifier.tryParse(map.getString(key));
+                if (id != null) {
+                    save.playersWithLamps.put(uuid, id);
+                }
             } catch (IllegalArgumentException ignored) {
             }
         }
@@ -60,11 +78,11 @@ public final class BeltLanternSave extends PersistentState {
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        NbtList list = new NbtList();
-        for (UUID u : playersWithLantern) {
-            list.add(NbtString.of(u.toString()));
+        NbtCompound map = new NbtCompound();
+        for (Map.Entry<UUID, Identifier> e : playersWithLamps.entrySet()) {
+            map.putString(e.getKey().toString(), e.getValue().toString());
         }
-        nbt.put(PLAYERS_KEY, list);
+        nbt.put(PLAYERS_KEY, map);
         return nbt;
     }
 }

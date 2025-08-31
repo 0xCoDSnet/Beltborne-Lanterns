@@ -1,7 +1,6 @@
 package net.oxcodsnet.beltborne_lanterns.common.client;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -12,14 +11,13 @@ import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
+import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfig;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
 import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 
 public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
-    private static final BlockState LANTERN_STATE = Blocks.LANTERN.getDefaultState().with(Properties.HANGING, false);
 
     public LanternBeltFeatureRenderer(FeatureRendererContext<T, M> context) {
         super(context);
@@ -79,7 +77,7 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         matrices.translate(-pivX, -pivY, -pivZ);
 
         BlockRenderManager brm = MinecraftClient.getInstance().getBlockRenderManager();
-        BlockState state = LANTERN_STATE; // render vanilla lantern, or customize as needed
+        BlockState state = LampRegistry.getState(BLClientAbstractions.clientLamp(player));
         brm.renderBlockAsEntity(state, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
 
         matrices.pop();

@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -11,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
+import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
@@ -54,22 +56,22 @@ public final class BLFabric implements ModInitializer {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity joining = handler.getPlayer();
             // Restore from persistent save
-            boolean persisted = BeltLanternSave.get(server).has(joining.getUuid());
-            BeltState.setHasLantern(joining, persisted);
+            Item persisted = BeltLanternSave.get(server).get(joining.getUuid());
+            BeltState.setLamp(joining, persisted);
             // Tell everyone (and self) about joining player's state
             BeltNetworking.broadcastBeltState(joining, persisted);
             // Send existing players' states to the joining player
             for (ServerPlayerEntity other : server.getPlayerManager().getPlayerList()) {
-                boolean has = BeltState.hasLantern(other);
-                BeltNetworking.sendTo(joining, other.getUuid(), has);
+                Item lamp = BeltState.getLamp(other);
+                BeltNetworking.sendTo(joining, other.getUuid(), lamp);
             }
         });
 
         // On disconnect, persist the current state for that player
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             ServerPlayerEntity leaving = handler.getPlayer();
-            boolean has = BeltState.hasLantern(leaving);
-            BeltLanternSave.get(server).set(leaving.getUuid(), has);
+            Item lamp = BeltState.getLamp(leaving);
+            BeltLanternSave.get(server).set(leaving.getUuid(), lamp);
         });
     }
 

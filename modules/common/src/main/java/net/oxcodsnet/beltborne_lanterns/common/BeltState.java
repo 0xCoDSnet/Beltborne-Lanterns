@@ -1,38 +1,48 @@
 package net.oxcodsnet.beltborne_lanterns.common;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Runtime-only per-player state: whether a lantern is "equipped on the belt".
- * Minimal demo: no persistence, no components; just memory + networking.
+ * Runtime-only per-player state: which lamp item (if any) is
+ * "equipped on the belt". Minimal demo: no persistence, no components;
+ * just memory + networking.
  */
 public final class BeltState {
-    private static final Set<UUID> PLAYERS_WITH_LANTERN = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, Item> PLAYER_LAMPS = new ConcurrentHashMap<>();
 
     private BeltState() {}
 
-    public static boolean hasLantern(UUID uuid) {
-        return PLAYERS_WITH_LANTERN.contains(uuid);
+    public static boolean hasLamp(UUID uuid) {
+        return PLAYER_LAMPS.containsKey(uuid);
     }
 
-    public static boolean hasLantern(PlayerEntity player) {
-        return hasLantern(player.getUuid());
+    public static boolean hasLamp(PlayerEntity player) {
+        return hasLamp(player.getUuid());
     }
 
-    public static void setHasLantern(UUID uuid, boolean hasLantern) {
-        if (hasLantern) {
-            PLAYERS_WITH_LANTERN.add(uuid);
+    public static Item getLamp(UUID uuid) {
+        return PLAYER_LAMPS.get(uuid);
+    }
+
+    public static Item getLamp(PlayerEntity player) {
+        return getLamp(player.getUuid());
+    }
+
+    public static void setLamp(UUID uuid, Item lamp) {
+        if (lamp != null) {
+            PLAYER_LAMPS.put(uuid, lamp);
         } else {
-            PLAYERS_WITH_LANTERN.remove(uuid);
+            PLAYER_LAMPS.remove(uuid);
         }
     }
 
-    public static void setHasLantern(PlayerEntity player, boolean hasLantern) {
-        setHasLantern(player.getUuid(), hasLantern);
+    public static void setLamp(PlayerEntity player, Item lamp) {
+        setLamp(player.getUuid(), lamp);
     }
 }
 

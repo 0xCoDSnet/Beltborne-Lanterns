@@ -20,6 +20,9 @@ import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientLogic;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
 import org.lwjgl.glfw.GLFW;
 
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
+
 import java.util.UUID;
 
 public final class BLFabricClient implements ClientModInitializer {
@@ -34,9 +37,9 @@ public final class BLFabricClient implements ClientModInitializer {
         // Register network receiver: updates local client set
         ClientPlayNetworking.registerGlobalReceiver(BeltSyncPayload.ID, (payload, context) -> {
             UUID uuid = payload.playerUuid();
-            boolean has = payload.hasLantern();
+            Item lamp = payload.lampId() != null ? Registries.ITEM.get(payload.lampId()) : null;
             MinecraftClient.getInstance().execute(() -> {
-                ClientBeltPlayers.setHas(uuid, has);
+                ClientBeltPlayers.setLamp(uuid, lamp);
             });
         });
 
@@ -81,7 +84,7 @@ public final class BLFabricClient implements ClientModInitializer {
         ));
 
         // Wire platform abstractions so common renderer can query state/debug
-        BLClientAbstractions.init(ClientBeltPlayers::hasLantern, BLClientAbstractions::isDebugDrawEnabled);
+        BLClientAbstractions.init(ClientBeltPlayers::getLamp, BLClientAbstractions::isDebugDrawEnabled);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKey.wasPressed()) {
