@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 
@@ -42,12 +41,12 @@ public final class BLFabric implements ModInitializer {
             ServerPlayerEntity player = context.player();
             context.server().execute(() -> {
                 ItemStack stack = player.getMainHandStack();
-                boolean hasLantern = BeltState.hasLantern(player);
-                if (!hasLantern && !stack.isOf(Items.LANTERN)) {
+                boolean hasLamp = BeltState.hasLamp(player);
+                if (!hasLamp && !LampRegistry.isLamp(stack)) {
                     stack = player.getOffHandStack();
-                    if (!stack.isOf(Items.LANTERN)) return;
+                    if (!LampRegistry.isLamp(stack)) return;
                 }
-                boolean nowHas = BeltLanternServer.toggleLantern(player, stack);
+                Item nowHas = BeltLanternServer.toggleLantern(player, stack);
                 BeltNetworking.broadcastBeltState(player, nowHas);
             });
         });

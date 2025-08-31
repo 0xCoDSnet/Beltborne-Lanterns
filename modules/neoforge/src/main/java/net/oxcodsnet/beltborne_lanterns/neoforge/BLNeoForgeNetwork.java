@@ -8,9 +8,10 @@ import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
+import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
 
 
@@ -30,12 +31,12 @@ public final class BLNeoForgeNetwork {
             ServerPlayerEntity player = (ServerPlayerEntity) ctx.player();
             ctx.enqueueWork(() -> {
                 ItemStack stack = player.getMainHandStack();
-                boolean hasLantern = BeltState.hasLantern(player);
-                if (!hasLantern && !stack.isOf(Items.LANTERN)) {
+                boolean hasLamp = BeltState.hasLamp(player);
+                if (!hasLamp && !LampRegistry.isLamp(stack)) {
                     stack = player.getOffHandStack();
-                    if (!stack.isOf(Items.LANTERN)) return;
+                    if (!LampRegistry.isLamp(stack)) return;
                 }
-                boolean nowHas = BeltLanternServer.toggleLantern(player, stack);
+                Item nowHas = BeltLanternServer.toggleLantern(player, stack);
                 BeltNetworking.broadcastBeltState(player, nowHas);
             });
         });
