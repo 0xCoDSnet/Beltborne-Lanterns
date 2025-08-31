@@ -9,17 +9,22 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
 
 
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
+
+import java.util.LinkedHashMap;
 // no direct config init here; client handles config lazily
 
 public final class BLFabric implements ModInitializer {
@@ -38,6 +43,7 @@ public final class BLFabric implements ModInitializer {
 
         // Register payload types for networking
         PayloadTypeRegistry.playS2C().register(BeltSyncPayload.ID, BeltSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(LampConfigSyncPayload.ID, LampConfigSyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC);
 
         // Handle client toggle requests
@@ -63,6 +69,13 @@ public final class BLFabric implements ModInitializer {
             BeltState.setLamp(joining, persisted);
             // Tell everyone (and self) about joining player's state
             BeltNetworking.broadcastBeltState(joining, persisted);
+            // Send lamp config from server to joining player
+            var lampMap = new LinkedHashMap<Identifier, Integer>();
+            BLLampConfigAccess.get().extraLampLight.forEach((idStr, lum) -> {
+                Identifier id = Identifier.tryParse(idStr);
+                if (id != null) lampMap.put(id, lum);
+            });
+            ServerPlayNetworking.send(joining, new LampConfigSyncPayload(lampMap));
             // Send existing players' states to the joining player
             for (ServerPlayerEntity other : server.getPlayerManager().getPlayerList()) {
                 Item lamp = BeltState.getLamp(other);

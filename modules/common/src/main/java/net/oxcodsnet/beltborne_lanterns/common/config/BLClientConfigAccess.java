@@ -4,6 +4,7 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.minecraft.util.ActionResult;
+import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 
 /**
  * Common accessor for the client config using Cloth AutoConfig.
@@ -20,11 +21,18 @@ public final class BLClientConfigAccess {
             if (HOLDER != null) return;
             AutoConfig.register(BLClientConfig.class, GsonConfigSerializer::new);
             HOLDER = AutoConfig.getConfigHolder(BLClientConfig.class);
+            // Seed lamp config from shared lamp config
+            HOLDER.getConfig().extraLampLight.putAll(BLLampConfigAccess.get().extraLampLight);
             // Seed common snapshot
             BLConfigs.set(copyToCommon(HOLDER.getConfig()));
             // Keep snapshot synced on save
             HOLDER.registerSaveListener((h, cfg) -> {
                 BLConfigs.set(copyToCommon(cfg));
+                BLLampConfig lampCfg = BLLampConfigAccess.get();
+                lampCfg.extraLampLight.clear();
+                lampCfg.extraLampLight.putAll(cfg.extraLampLight);
+                BLLampConfigAccess.save();
+                LampRegistry.init();
                 return ActionResult.SUCCESS;
             });
         }

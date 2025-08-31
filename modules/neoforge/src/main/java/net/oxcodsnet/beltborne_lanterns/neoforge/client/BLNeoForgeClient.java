@@ -24,8 +24,12 @@ import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
 import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
+import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -109,6 +113,20 @@ public final class BLNeoForgeClient {
                     ClientBeltPlayers.setLamp(uuid, lamp);
                 }
         );
+        registrar.playToClient(
+                LampConfigSyncPayload.ID,
+                LampConfigSyncPayload.CODEC,
+                (payload, ctx) -> {
+                    var lampCfg = BLLampConfigAccess.get();
+                    lampCfg.extraLampLight.clear();
+                    payload.lamps().forEach((id, lum) -> lampCfg.extraLampLight.put(id.toString(), lum));
+                    var cliCfg = BLClientConfigAccess.get();
+                    cliCfg.extraLampLight.clear();
+                    payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.put(id.toString(), lum));
+                    LampRegistry.init();
+                }
+        );
+        registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
     }
 
     @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)

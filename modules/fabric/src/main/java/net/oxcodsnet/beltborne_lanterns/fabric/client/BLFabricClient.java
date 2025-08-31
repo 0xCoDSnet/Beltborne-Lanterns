@@ -18,6 +18,10 @@ import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer
 import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientLogic;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
+import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
+import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.item.Item;
@@ -40,6 +44,19 @@ public final class BLFabricClient implements ClientModInitializer {
             Item lamp = payload.lampId() != null ? Registries.ITEM.get(payload.lampId()) : null;
             MinecraftClient.getInstance().execute(() -> {
                 ClientBeltPlayers.setLamp(uuid, lamp);
+            });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(LampConfigSyncPayload.ID, (payload, context) -> {
+            MinecraftClient client = MinecraftClient.getInstance();
+            client.execute(() -> {
+                var lampCfg = BLLampConfigAccess.get();
+                lampCfg.extraLampLight.clear();
+                payload.lamps().forEach((id, lum) -> lampCfg.extraLampLight.put(id.toString(), lum));
+                var cliCfg = BLClientConfigAccess.get();
+                cliCfg.extraLampLight.clear();
+                payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.put(id.toString(), lum));
+                LampRegistry.init();
             });
         });
 
