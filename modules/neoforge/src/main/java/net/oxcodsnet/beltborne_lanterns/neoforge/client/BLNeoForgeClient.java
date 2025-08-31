@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.player.PlayerEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
@@ -13,6 +14,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
@@ -33,6 +35,7 @@ import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
+import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 
 import java.util.UUID;
 
@@ -132,6 +135,13 @@ public final class BLNeoForgeClient {
     @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)
     public static final class ClientBus {
         private ClientBus() {}
+
+        @SubscribeEvent
+        public static void onEntityLeave(EntityLeaveLevelEvent event) {
+            if (event.getEntity() instanceof PlayerEntity) {
+                LanternSwingManager.removePlayer(event.getEntity().getUuid());
+            }
+        }
 
         @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Post e) {

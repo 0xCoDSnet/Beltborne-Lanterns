@@ -32,6 +32,15 @@ public final class LanternSwingManager {
     private static final float IMPULSE_START_MOVE_X = -0.7f; // when starting to move: slight back
     private static final float IMPULSE_STOP_MOVE_X  = +0.5f; // when stopping: slight forward
 
+    // Event detection thresholds
+    private static final double MOVE_THRESHOLD_BPS = 1.6;   // blocks/sec, for start/stop impulses
+    private static final double JUMP_THRESHOLD_B_TICK = 0.08; // blocks/tick, vertical
+    private static final double LAND_THRESHOLD_B_TICK = -0.08;  // blocks/tick, vertical
+
+    // Pose targets
+    private static final float SNEAK_BASE_ROT_X_DEG = 215f;
+    private static final float SNEAK_BLEND_TAU_SEC = 0.15f;
+
     // Per-player state
     private static final Map<UUID, LanternSwingState> STATES = new ConcurrentHashMap<>();
     private static final Map<UUID, Kinematics> KIN = new ConcurrentHashMap<>();
@@ -89,14 +98,14 @@ public final class LanternSwingManager {
         boolean wasOnGround = kin.prevOnGround;
         boolean sneaking = p.isSneaking();
         boolean wasSneaking = kin.prevSneaking;
-        boolean moving = hSpeedPerSec > 0.08 * 20.0; // threshold in per-second units
+        boolean moving = hSpeedPerSec > MOVE_THRESHOLD_BPS;
         boolean wasMoving = kin.prevMoving;
 
-        if (wasOnGround && !onGround && vy > 0.08) {
+        if (wasOnGround && !onGround && vy > JUMP_THRESHOLD_B_TICK) {
             // Jumped
             state.impulseX(IMPULSE_JUMP_X);
         }
-        if (!wasOnGround && onGround && kin.prevYVel < -0.08) {
+        if (!wasOnGround && onGround && kin.prevYVel < LAND_THRESHOLD_B_TICK) {
             // Landed
             state.impulseX(IMPULSE_LAND_X);
         }
@@ -111,13 +120,13 @@ public final class LanternSwingManager {
             state.impulseX(IMPULSE_STOP_MOVE_X);
         }
 
-        // Smooth target base X (sneak pose) — approach towards 215° or provided baseRotXDeg
-        float targetBaseX = sneaking ? 215f : baseRotXDeg;
+        // Smooth target base X (sneak pose) — approach towards SNEAK_BASE_ROT_X_DEG or provided baseRotXDeg
+        float targetBaseX = sneaking ? SNEAK_BASE_ROT_X_DEG : baseRotXDeg;
         if (!kin.baseInit) {
             kin.baseXDegSmoothed = targetBaseX;
             kin.baseInit = true;
         }
-        kin.baseXDegSmoothed = approachExp(kin.baseXDegSmoothed, targetBaseX, dtSec, 0.15f);
+        kin.baseXDegSmoothed = approachExp(kin.baseXDegSmoothed, targetBaseX, dtSec, SNEAK_BLEND_TAU_SEC);
 
         // Integrate
         state.step(dtSec, uX, uZ);
@@ -148,6 +157,11 @@ public final class LanternSwingManager {
         Kinematics k = KIN.get(id);
         if (k == null) return 0f;
         return k.baseXDegSmoothed;
+    }
+
+    public static void removePlayer(UUID id) {
+        STATES.remove(id);
+        KIN.remove(id);
     }
 
     private static float wrapDegrees(float deg) {

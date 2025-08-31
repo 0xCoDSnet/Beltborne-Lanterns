@@ -1,6 +1,7 @@
 package net.oxcodsnet.beltborne_lanterns.fabric.client;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -10,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
@@ -22,6 +24,7 @@ import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.item.Item;
@@ -61,9 +64,18 @@ public final class BLFabricClient implements ClientModInitializer {
         });
 
         // Register a feature renderer for players to draw the lantern on the belt
-        LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
+        @SuppressWarnings("unchecked")
+        LivingEntityFeatureRendererRegistrationCallback playerFeatureRendererCallback = (entityType, renderer, helper, context) -> {
             if (entityType == EntityType.PLAYER) {
                 helper.register(new LanternBeltFeatureRenderer(renderer));
+            }
+        };
+        LivingEntityFeatureRendererRegistrationCallback.EVENT.register(playerFeatureRendererCallback);
+
+        // Clean up swing manager state when a player entity is unloaded
+        ClientEntityEvents.ENTITY_UNLOAD.register((entity, world) -> {
+            if (entity instanceof PlayerEntity) {
+                LanternSwingManager.removePlayer(entity.getUuid());
             }
         });
 

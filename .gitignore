@@ -39,12 +39,8 @@ install-fabric.sh
 
 # Folders
 !/gradle
-!/src-fabric
-!/src-fabric/main/java/net/oxcodsnet/roadarchitect/config/
+!/modules
 !/.github
-!/common/src
-!/neoforge
-!/fabric
 
 # Files
 !/.gitattributes

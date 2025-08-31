@@ -19,6 +19,9 @@ import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 
 public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
 
+    // The lantern model might need a rotation adjustment to face forward.
+    private static final float MODEL_Y_ROTATION_DEGREES = 180f;
+
     public LanternBeltFeatureRenderer(FeatureRendererContext<T, M> context) {
         super(context);
     }
@@ -64,7 +67,7 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         }
 
         matrices.translate(pivX, pivY, pivZ);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MODEL_Y_ROTATION_DEGREES));
         matrices.scale(s, s, s);
 
         float dynX = LanternSwingManager.getXDeg(player.getUuid());
