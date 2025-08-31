@@ -188,7 +188,7 @@ public class LanternDebugScreen extends Screen {
             default: break;
         }
         if (used) {
-            AutoConfig.getConfigHolder(BLClientConfig.class).save();
+            BLClientConfigAccess.save();
             refreshCopyPreview();
             return true;
         }

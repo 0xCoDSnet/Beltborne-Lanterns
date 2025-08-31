@@ -5,7 +5,9 @@ import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Config(name = BLMod.MOD_ID)
@@ -56,7 +58,7 @@ public class BLClientConfig implements ConfigData {
 
 
     @ConfigEntry.Category("lamps")
-    public Map<String, Integer> extraLampLight = new LinkedHashMap<>();
+    public java.util.List<ExtraLampEntry> extraLampLight = new java.util.ArrayList<>();
 
     public float fOffsetX() { return offsetX100 / 100f; }
     public float fOffsetY() { return offsetY100 / 100f; }
@@ -65,4 +67,19 @@ public class BLClientConfig implements ConfigData {
     public float fPivotY()  { return pivotY100 / 100f; }
     public float fPivotZ()  { return pivotZ100 / 100f; }
     public float fScale()   { return scale100 / 100f; }
+
+    public static class ExtraLampEntry {
+        @ConfigEntry.Gui.Tooltip
+        public String id = "modid:item_id";
+
+        @ConfigEntry.Gui.Tooltip @ConfigEntry.BoundedDiscrete(min = 0, max = 15)
+        public int luminance = 15;
+
+        public ExtraLampEntry() {}
+
+        public ExtraLampEntry(String id, int luminance) {
+            this.id = id;
+            this.luminance = luminance;
+        }
+    }
 }

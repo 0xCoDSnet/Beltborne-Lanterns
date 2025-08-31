@@ -42,9 +42,9 @@ public final class BLNeoForgeServerEvents {
         BeltState.setLamp(joining, persisted);
         BeltNetworking.broadcastBeltState(joining, persisted);
         var lampMap = new java.util.LinkedHashMap<Identifier, Integer>();
-        BLLampConfigAccess.get().extraLampLight.forEach((idStr, lum) -> {
-            Identifier id = Identifier.tryParse(idStr);
-            if (id != null) lampMap.put(id, lum);
+        BLLampConfigAccess.get().extraLampLight.forEach(entry -> {
+            Identifier id = Identifier.tryParse(entry.id);
+            if (id != null) lampMap.put(id, entry.luminance);
         });
         PacketDistributor.sendToPlayer(joining, new LampConfigSyncPayload(lampMap));
         for (ServerPlayerEntity other : server.getPlayerManager().getPlayerList()) {

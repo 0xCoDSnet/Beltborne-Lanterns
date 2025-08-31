@@ -51,9 +51,9 @@ public final class BLFabricServerEvents {
             BeltNetworking.broadcastBeltState(joining, persisted);
             // Send lamp config from server to joining player
             var lampMap = new LinkedHashMap<Identifier, Integer>();
-            BLLampConfigAccess.get().extraLampLight.forEach((idStr, lum) -> {
-                Identifier id = Identifier.tryParse(idStr);
-                if (id != null) lampMap.put(id, lum);
+            BLLampConfigAccess.get().extraLampLight.forEach(entry -> {
+                Identifier id = Identifier.tryParse(entry.id);
+                if (id != null) lampMap.put(id, entry.luminance);
             });
             ServerPlayNetworking.send(joining, new LampConfigSyncPayload(lampMap));
             // Send existing players' states to the joining player

@@ -21,8 +21,18 @@ public final class BLClientConfigAccess {
             if (HOLDER != null) return;
             AutoConfig.register(BLClientConfig.class, GsonConfigSerializer::new);
             HOLDER = AutoConfig.getConfigHolder(BLClientConfig.class);
-            // Seed lamp config from shared lamp config
-            HOLDER.getConfig().extraLampLight.putAll(BLLampConfigAccess.get().extraLampLight);
+            BLClientConfig clientConfig = HOLDER.getConfig();
+            clientConfig.extraLampLight.clear(); // Clear existing to avoid duplicates on re-init
+
+            java.util.Map<String, BLClientConfig.ExtraLampEntry> tempMap = new java.util.LinkedHashMap<>();
+
+            // Add/overwrite lamps from BLLampConfigAccess (server-synced/custom)
+            BLLampConfigAccess.get().extraLampLight.forEach(entry -> {
+                tempMap.put(entry.id, new BLClientConfig.ExtraLampEntry(entry.id, entry.luminance));
+            });
+
+            // Convert tempMap to List and set it to clientConfig.extraLampLight
+            clientConfig.extraLampLight.addAll(tempMap.values());
             // Seed common snapshot
             BLConfigs.set(copyToCommon(HOLDER.getConfig()));
             // Keep snapshot synced on save
@@ -30,7 +40,7 @@ public final class BLClientConfigAccess {
                 BLConfigs.set(copyToCommon(cfg));
                 BLLampConfig lampCfg = BLLampConfigAccess.get();
                 lampCfg.extraLampLight.clear();
-                lampCfg.extraLampLight.putAll(cfg.extraLampLight);
+                cfg.extraLampLight.forEach(entry -> lampCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(entry.id, entry.luminance)));
                 BLLampConfigAccess.save();
                 LampRegistry.init();
                 return ActionResult.SUCCESS;
@@ -63,4 +73,3 @@ public final class BLClientConfigAccess {
         return out;
     }
 }
-

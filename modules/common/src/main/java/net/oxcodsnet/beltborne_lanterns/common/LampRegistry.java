@@ -71,16 +71,17 @@ public final class LampRegistry {
 
         // Register additional lamps from config with custom luminance
         var cfg = BLLampConfigAccess.get();
-        cfg.extraLampLight.forEach((idStr, lum) -> {
-            Identifier id = Identifier.tryParse(idStr);
+        cfg.extraLampLight.forEach(entry -> {
+            Identifier id = Identifier.tryParse(entry.id);
             if (id == null) return;
             Item item = Registries.ITEM.get(id);
+            if (item == Items.AIR) return;
             if (!(item instanceof BlockItem blockItem)) return;
             BlockState state = blockItem.getBlock().getDefaultState();
             if (state.contains(Properties.HANGING)) {
                 state = state.with(Properties.HANGING, false);
             }
-            register(item, state, lum);
+            register(item, state, entry.luminance);
         });
     }
 

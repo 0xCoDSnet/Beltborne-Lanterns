@@ -1,5 +1,6 @@
 package net.oxcodsnet.beltborne_lanterns.neoforge.client;
 
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -123,7 +124,7 @@ public final class BLNeoForgeClient {
                     ctx.enqueueWork(() -> {
                         var cliCfg = BLClientConfigAccess.get();
                         cliCfg.extraLampLight.clear();
-                        payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.put(id.toString(), lum));
+                        payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(id.toString(), lum)));
                         BLClientConfigAccess.save();
                     });
                 }

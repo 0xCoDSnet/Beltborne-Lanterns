@@ -1,5 +1,6 @@
 package net.oxcodsnet.beltborne_lanterns.fabric.client;
 
+import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -55,7 +56,7 @@ public final class BLFabricClient implements ClientModInitializer {
             client.execute(() -> {
                 var cliCfg = BLClientConfigAccess.get();
                 cliCfg.extraLampLight.clear();
-                payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.put(id.toString(), lum));
+                payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(id.toString(), lum)));
                 BLClientConfigAccess.save();
             });
         });
