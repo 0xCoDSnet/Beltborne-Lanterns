@@ -33,5 +33,6 @@ public class BLDataGenerator implements DataGeneratorEntrypoint {
         pack.addProvider((FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registries) ->
                         new BLLanguageProvider(output, registries, "uk_ua")
         );
+        pack.addProvider(BLLampTagProvider::new);
     }
 }
