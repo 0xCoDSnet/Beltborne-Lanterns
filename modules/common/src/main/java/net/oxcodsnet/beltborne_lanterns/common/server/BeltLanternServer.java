@@ -44,5 +44,26 @@ public final class BeltLanternServer {
             return null;
         }
     }
+
+    /**
+     * Handles player death logic with respect to the belt lantern.
+     * If keepInventory is disabled the lamp is dropped and state cleared,
+     * otherwise the lamp remains equipped.
+     *
+     * @param player        the dying player
+     * @param keepInventory whether the KEEP_INVENTORY gamerule is enabled
+     * @return the lamp item that remains equipped, or {@code null} if none
+     */
+    public static Item handleDeath(ServerPlayerEntity player, boolean keepInventory) {
+        Item lamp = BeltState.getLamp(player);
+        if (lamp == null) return null;
+        if (keepInventory) {
+            return lamp;
+        }
+        player.dropStack(new ItemStack(lamp));
+        BeltState.setLamp(player, null);
+        BeltLanternSave.get(player.server).set(player.getUuid(), null);
+        return null;
+    }
 }
 

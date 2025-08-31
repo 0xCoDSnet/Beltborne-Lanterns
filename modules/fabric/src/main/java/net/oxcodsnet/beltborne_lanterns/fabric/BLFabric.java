@@ -4,9 +4,11 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameRules;
 
 
 import net.oxcodsnet.beltborne_lanterns.BLMod;
@@ -71,6 +73,18 @@ public final class BLFabric implements ModInitializer {
             ServerPlayerEntity leaving = handler.getPlayer();
             Item lamp = BeltState.getLamp(leaving);
             BeltLanternSave.get(server).set(leaving.getUuid(), lamp);
+        });
+
+        // Handle lamp drop/persistence on death and sync after respawn
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+            if (alive) return;
+            boolean keep = oldPlayer.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+            BeltLanternServer.handleDeath(oldPlayer, keep);
+        });
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+            if (alive) return;
+            Item lamp = BeltState.getLamp(newPlayer);
+            BeltNetworking.broadcastBeltState(newPlayer, lamp);
         });
     }
 
