@@ -40,13 +40,23 @@ public final class LampRegistry {
      * supported lamps without code changes.
      */
     public static void init() {
+        // Clear previous entries so tag reloads can rebuild the registry
+        LAMPS.clear();
+
         // Built-in vanilla lamps
         register(Items.LANTERN, Blocks.LANTERN.getDefaultState().with(Properties.HANGING, false));
         register(Items.SOUL_LANTERN, Blocks.SOUL_LANTERN.getDefaultState().with(Properties.HANGING, false));
 
         // Dynamically register any additional tagged items
         Registries.ITEM.getEntryList(EXTRA_LAMPS_TAG).ifPresent(list -> {
+
+            BLMod.LOGGER.info("Found {} entries in #{}:lamps", list.size(), BLMod.MOD_ID);
+
             for (RegistryEntry<Item> entry : list) {
+
+                Identifier id = Registries.ITEM.getId(entry.value());
+                BLMod.LOGGER.info(" - {}", id);
+
                 Item item = entry.value();
                 if (LAMPS.containsKey(item)) continue;
                 if (item instanceof BlockItem blockItem) {

@@ -6,13 +6,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
-import net.oxcodsnet.beltborne_lanterns.neoforge.BeltNetworking;
 
 /**
  * Server-side interaction + sync logic for NeoForge.
@@ -21,6 +22,11 @@ import net.oxcodsnet.beltborne_lanterns.neoforge.BeltNetworking;
 public final class BLNeoForgeServerEvents {
     private BLNeoForgeServerEvents() {}
 
+
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent e) {
+        LampRegistry.init();
+    }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -57,5 +63,10 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity player)) return;
         Item lamp = BeltState.getLamp(player);
         BeltNetworking.broadcastBeltState(player, lamp);
+    }
+
+    @SubscribeEvent
+    public static void onTagsUpdated(TagsUpdatedEvent event) {
+        LampRegistry.init();
     }
 }

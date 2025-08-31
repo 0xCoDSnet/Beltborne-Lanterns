@@ -1,6 +1,7 @@
 package net.oxcodsnet.beltborne_lanterns.fabric;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -29,7 +30,8 @@ public final class BLFabric implements ModInitializer {
         // Proceed with mild caution.
 
         // Run our common setup.
-        BLMod.init();
+        //BLMod.init();
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> LampRegistry.init());
         LambDynLightsCompat.init();
 
         // Config is initialized lazily on the client when accessed.

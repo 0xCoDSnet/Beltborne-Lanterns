@@ -109,7 +109,6 @@ public final class BLNeoForgeClient {
                     ClientBeltPlayers.setLamp(uuid, lamp);
                 }
         );
-        registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
     }
 
     @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)
