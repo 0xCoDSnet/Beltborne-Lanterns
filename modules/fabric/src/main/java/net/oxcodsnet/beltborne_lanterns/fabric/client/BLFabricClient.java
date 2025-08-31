@@ -12,6 +12,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.EntityType;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
 import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
@@ -26,6 +27,7 @@ public final class BLFabricClient implements ClientModInitializer {
     private static KeyBinding openConfigKey;
     private static KeyBinding toggleDebugKey;
     private static KeyBinding openDebugEditorKey;
+    private static KeyBinding toggleLanternKey;
 
     @Override
     public void onInitializeClient() {
@@ -71,6 +73,13 @@ public final class BLFabricClient implements ClientModInitializer {
                 "category.beltborne_lanterns"
         ));
 
+        // Keybind to toggle belt lantern (default: B)
+        toggleLanternKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.beltborne_lanterns.toggle_lantern",
+                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_B,
+                "category.beltborne_lanterns"
+        ));
+
         // Wire platform abstractions so common renderer can query state/debug
         BLClientAbstractions.init(ClientBeltPlayers::hasLantern, BLClientAbstractions::isDebugDrawEnabled);
 
@@ -93,6 +102,10 @@ public final class BLFabricClient implements ClientModInitializer {
                         client.setScreen(new net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen());
                     }
                 }
+            }
+
+            if (toggleLanternKey.wasPressed()) {
+                ClientPlayNetworking.send(new ToggleLanternPayload());
             }
 
             // Update lantern physics states for players who have a belt lantern

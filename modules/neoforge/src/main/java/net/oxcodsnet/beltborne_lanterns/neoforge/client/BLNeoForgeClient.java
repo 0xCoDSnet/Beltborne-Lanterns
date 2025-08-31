@@ -24,6 +24,8 @@ import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
 import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.UUID;
 
@@ -37,6 +39,7 @@ public final class BLNeoForgeClient {
     private static KeyBinding openConfigKey;
     private static KeyBinding toggleDebugKey;
     private static KeyBinding openDebugEditorKey;
+    private static KeyBinding toggleLanternKey;
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
@@ -68,9 +71,15 @@ public final class BLNeoForgeClient {
                 InputUtil.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_P,
                 "category.beltborne_lanterns"
         );
+        toggleLanternKey = new KeyBinding(
+                "key.beltborne_lanterns.toggle_lantern",
+                InputUtil.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_B,
+                "category.beltborne_lanterns"
+        );
         event.register(openConfigKey);
         event.register(toggleDebugKey);
         event.register(openDebugEditorKey);
+        event.register(toggleLanternKey);
     }
 
     @SubscribeEvent
@@ -97,6 +106,7 @@ public final class BLNeoForgeClient {
                     ClientBeltPlayers.setHas(uuid, has);
                 }
         );
+        registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
     }
 
     @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)
@@ -124,6 +134,10 @@ public final class BLNeoForgeClient {
                         mc.setScreen(new LanternDebugScreen());
                     }
                 }
+            }
+
+            if (toggleLanternKey != null && toggleLanternKey.wasPressed()) {
+                PacketDistributor.sendToServer(new ToggleLanternPayload());
             }
 
             LanternClientLogic.tickLanternPhysics(mc);

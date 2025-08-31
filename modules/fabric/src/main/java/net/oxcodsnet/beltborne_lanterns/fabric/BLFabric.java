@@ -1,19 +1,18 @@
 package net.oxcodsnet.beltborne_lanterns.fabric;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+
 
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
@@ -32,12 +31,24 @@ public final class BLFabric implements ModInitializer {
 
         // Config is initialized lazily on the client when accessed.
 
-        // Register payload type (S2C) for belt sync on server and integrated client
+        // Register payload types for networking
         PayloadTypeRegistry.playS2C().register(BeltSyncPayload.ID, BeltSyncPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC);
 
-        // Register shift+right-click with lantern toggle logic (server authoritative)
-        UseItemCallback.EVENT.register((player, world, hand) -> toggleLanternOnUse(player, world, hand));
-        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> toggleLanternOnBlock(player, world, hand));
+        // Handle client toggle requests
+        ServerPlayNetworking.registerGlobalReceiver(ToggleLanternPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            context.server().execute(() -> {
+                ItemStack stack = player.getMainHandStack();
+                boolean hasLantern = BeltState.hasLantern(player);
+                if (!hasLantern && !stack.isOf(Items.LANTERN)) {
+                    stack = player.getOffHandStack();
+                    if (!stack.isOf(Items.LANTERN)) return;
+                }
+                boolean nowHas = BeltLanternServer.toggleLantern(player, stack);
+                BeltNetworking.broadcastBeltState(player, nowHas);
+            });
+        });
 
         // When a player joins, sync known belt states of all players to them and restore theirs
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -62,28 +73,5 @@ public final class BLFabric implements ModInitializer {
         });
     }
 
-    private static TypedActionResult<ItemStack> toggleLanternOnUse(net.minecraft.entity.player.PlayerEntity player, net.minecraft.world.World world, Hand hand) {
-        ItemStack stack = player.getStackInHand(hand);
-        if (world.isClient()) return TypedActionResult.pass(stack);
-        if (!player.isSneaking()) return TypedActionResult.pass(stack);
-        boolean hasLantern = BeltState.hasLantern(player);
-        if (!hasLantern && !stack.isOf(Items.LANTERN)) return TypedActionResult.pass(stack);
-        doToggle((ServerPlayerEntity) player, stack);
-        return TypedActionResult.success(stack, world.isClient());
-    }
-
-    private static net.minecraft.util.ActionResult toggleLanternOnBlock(net.minecraft.entity.player.PlayerEntity player, net.minecraft.world.World world, Hand hand) {
-        ItemStack stack = player.getStackInHand(hand);
-        if (world.isClient()) return net.minecraft.util.ActionResult.PASS;
-        if (!player.isSneaking()) return net.minecraft.util.ActionResult.PASS;
-        boolean hasLantern = BeltState.hasLantern(player);
-        if (!hasLantern && !stack.isOf(Items.LANTERN)) return net.minecraft.util.ActionResult.PASS;
-        doToggle((ServerPlayerEntity) player, stack);
-        return net.minecraft.util.ActionResult.SUCCESS;
-    }
-
-    private static void doToggle(ServerPlayerEntity player, ItemStack stackInHand) {
-        boolean nowHas = BeltLanternServer.toggleLantern(player, stackInHand);
-        BeltNetworking.broadcastBeltState(player, nowHas);
-    }
+    // no-op methods removed: toggling now handled via network payload
 }
