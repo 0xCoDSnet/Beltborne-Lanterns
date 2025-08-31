@@ -69,7 +69,7 @@ Need it back in your hands? Press **B** again. 💡
 
 ## ❓ FAQ — compatibility & multiplayer
 
-* **Does it work in multiplayer?** — **YES!**
+* **Does it work in multiplayer?** — **YES!** *(Requires both client and server)*
 * **Does it emit light in vanilla Minecraft?** — **No.** Install a dynamic lighting mod to get light from the belt lantern:
     * **Fabric:** [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights)
     * **NeoForge:** [LambDynamicLights Unofficial](https://modrinth.com/mod/lambdynamiclights-unofficial-neoforge)
