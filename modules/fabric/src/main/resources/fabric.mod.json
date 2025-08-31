@@ -16,6 +16,9 @@
     "main": [
       "net.oxcodsnet.beltborne_lanterns.fabric.BLFabric"
     ],
+    "fabric-datagen": [
+      "net.oxcodsnet.beltborne_lanterns.fabric.datagen.BLDataGenerator"
+    ],
     "client": [
       "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricClient"
     ],
