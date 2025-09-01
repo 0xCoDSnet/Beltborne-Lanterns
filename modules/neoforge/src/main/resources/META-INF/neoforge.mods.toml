@@ -7,7 +7,9 @@ license="${mod_license}"
 modId = "beltborne_lanterns"
 version="${version}"
 displayName="${mod_name}"
-description="${mod_description}"
+description = '''
+${mod_description}
+'''
 logoFile = "assets/beltborne_lanterns/icon.png"
 
 [[dependencies.beltborne_lanterns]]
