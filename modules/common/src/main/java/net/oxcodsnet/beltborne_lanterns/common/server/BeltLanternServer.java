@@ -29,18 +29,30 @@ public final class BeltLanternServer {
         if (current == null) {
             Item item = stackInHand.getItem();
             if (!LampRegistry.isLamp(item)) return null;
+            // Copy the exact stack (count=1) BEFORE decrementing, to preserve NBT when count==1
+            ItemStack equipped = stackInHand.copyWithCount(1);
             if (!creative) {
                 stackInHand.decrement(1);
             }
-            BeltState.setLamp(player, item);
-            BeltLanternSave.get(player.server).set(player.getUuid(), item);
+            // Store the exact stack (count=1) to preserve NBT/enchantments/etc.
+            BeltState.setLamp(player, equipped);
+            // Persist full stack including NBT for cross-restart restore
+            BeltLanternSave.get(player.server).set(player.getUuid(), equipped);
             return item;
         } else {
             if (!creative) {
-                player.giveItemStack(new ItemStack(current));
+                // Return the exact stored stack with NBT back to the player
+                ItemStack stored = BeltState.getLampStack(player);
+                if (stored != null && !stored.isEmpty()) {
+                    player.giveItemStack(stored);
+                } else {
+                    // Fallback: at least return the plain item
+                    player.giveItemStack(new ItemStack(current));
+                }
             }
-            BeltState.setLamp(player, null);
-            BeltLanternSave.get(player.server).set(player.getUuid(), null);
+            // Clear state and persistence
+            BeltState.setLamp(player, (ItemStack) null);
+            BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
             return null;
         }
     }
@@ -60,10 +72,16 @@ public final class BeltLanternServer {
         if (keepInventory) {
             return lamp;
         }
-        player.dropStack(new ItemStack(lamp));
-        BeltState.setLamp(player, null);
-        BeltLanternSave.get(player.server).set(player.getUuid(), null);
+        // Drop the exact stored stack with NBT
+        ItemStack stored = BeltState.getLampStack(player);
+        if (stored != null && !stored.isEmpty()) {
+            player.dropStack(stored);
+        } else {
+            // Fallback: at least drop the plain item
+            player.dropStack(new ItemStack(lamp));
+        }
+        BeltState.setLamp(player, (ItemStack) null);
+        BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
         return null;
     }
 }
-
