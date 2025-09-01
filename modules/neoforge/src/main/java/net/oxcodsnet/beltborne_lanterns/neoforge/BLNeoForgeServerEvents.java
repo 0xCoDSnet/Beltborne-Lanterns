@@ -41,12 +41,16 @@ public final class BLNeoForgeServerEvents {
         Item persisted = BeltLanternSave.get(server).get(joining.getUuid());
         BeltState.setLamp(joining, persisted);
         BeltNetworking.broadcastBeltState(joining, persisted);
-        var lampMap = new java.util.LinkedHashMap<Identifier, Integer>();
-        BLLampConfigAccess.get().extraLampLight.forEach(entry -> {
-            Identifier id = Identifier.tryParse(entry.id);
-            if (id != null) lampMap.put(id, entry.luminance);
-        });
-        PacketDistributor.sendToPlayer(joining, new LampConfigSyncPayload(lampMap));
+        // If on a dedicated server, send its lamp config to the joining player.
+        // In single player, the client's config is trusted as the source of truth.
+        if (server.isDedicated()) {
+            var lampMap = new java.util.LinkedHashMap<Identifier, Integer>();
+            BLLampConfigAccess.get().extraLampLight.forEach(entry -> {
+                Identifier id = Identifier.tryParse(entry.id);
+                if (id != null) lampMap.put(id, entry.luminance);
+            });
+            PacketDistributor.sendToPlayer(joining, new LampConfigSyncPayload(lampMap));
+        }
         for (ServerPlayerEntity other : server.getPlayerManager().getPlayerList()) {
             Item lamp = BeltState.getLamp(other);
             BeltNetworking.sendTo(joining, other.getUuid(), lamp);

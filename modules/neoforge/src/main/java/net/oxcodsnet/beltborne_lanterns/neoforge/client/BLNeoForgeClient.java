@@ -54,6 +54,10 @@ public final class BLNeoForgeClient {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
+        // Load the lamp registry from the client's config file on startup.
+        // This makes the config screen work before joining a world.
+        LampRegistry.init();
+
         // Provide platform bridges for common renderer
         BLClientAbstractions.init(ClientBeltPlayers::getLamp, BLClientAbstractions::isDebugDrawEnabled);
 
@@ -121,11 +125,15 @@ public final class BLNeoForgeClient {
                 LampConfigSyncPayload.ID,
                 LampConfigSyncPayload.CODEC,
                 (payload, ctx) -> {
+                    // This receiver handles lamp configs sent from a dedicated server.
                     ctx.enqueueWork(() -> {
                         var cliCfg = BLClientConfigAccess.get();
                         cliCfg.extraLampLight.clear();
                         payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(id.toString(), lum)));
                         BLClientConfigAccess.save();
+
+                        // Re-initialize the lamp registry with the new data from the server.
+                        LampRegistry.init();
                     });
                 }
         );

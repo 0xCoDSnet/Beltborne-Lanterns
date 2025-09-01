@@ -42,6 +42,10 @@ public final class BLFabricClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Load the lamp registry from the client's config file on startup.
+        // This makes the config screen work before joining a world.
+        LampRegistry.init();
+
         // Register network receiver: updates local client set
         ClientPlayNetworking.registerGlobalReceiver(BeltSyncPayload.ID, (payload, context) -> {
             UUID uuid = payload.playerUuid();
@@ -51,6 +55,7 @@ public final class BLFabricClient implements ClientModInitializer {
             });
         });
 
+        // This receiver handles lamp configs sent from a dedicated server.
         ClientPlayNetworking.registerGlobalReceiver(LampConfigSyncPayload.ID, (payload, context) -> {
             MinecraftClient client = MinecraftClient.getInstance();
             client.execute(() -> {
@@ -58,6 +63,9 @@ public final class BLFabricClient implements ClientModInitializer {
                 cliCfg.extraLampLight.clear();
                 payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(id.toString(), lum)));
                 BLClientConfigAccess.save();
+
+                // Re-initialize the lamp registry with the new data from the server.
+                LampRegistry.init();
             });
         });
 
