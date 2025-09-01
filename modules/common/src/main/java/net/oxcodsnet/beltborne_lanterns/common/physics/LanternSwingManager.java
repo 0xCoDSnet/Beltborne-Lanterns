@@ -47,7 +47,7 @@ public final class LanternSwingManager {
 
     private LanternSwingManager() {}
 
-    public static LanternSwingState getOrCreate(UUID id) {
+    private static LanternSwingState getOrCreate(UUID id) {
         return STATES.computeIfAbsent(id, u -> new LanternSwingState(DEFAULT_OMEGA, DEFAULT_ZETA));
     }
 

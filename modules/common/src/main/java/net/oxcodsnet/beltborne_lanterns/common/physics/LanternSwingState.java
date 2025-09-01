@@ -24,8 +24,6 @@ public final class LanternSwingState {
 
     // Accumulated per-tick impulses (rad/s)
     private float impulseXdot;
-    private float impulseZdot;
-
     public LanternSwingState(float omega, float zeta) {
         this.omega = omega;
         this.zeta = zeta;
@@ -36,12 +34,10 @@ public final class LanternSwingState {
         this.prevX = 0f;
         this.prevZ = 0f;
         this.impulseXdot = 0f;
-        this.impulseZdot = 0f;
     }
 
     /** Apply an instantaneous velocity impulse (rad/s) to the given axis. */
     public void impulseX(float vRadPerSec) { this.impulseXdot += vRadPerSec; }
-    public void impulseZ(float vRadPerSec) { this.impulseZdot += vRadPerSec; }
 
     /**
      * Step integration by dtSec with external forcing inputs uX, uZ (rad/s^2).
@@ -59,10 +55,7 @@ public final class LanternSwingState {
             this.xDot += impulseXdot;
             impulseXdot = 0f;
         }
-        if (impulseZdot != 0f) {
-            this.zDot += impulseZdot;
-            impulseZdot = 0f;
-        }
+        
 
         // Damped oscillator integration per axis
         float ax = uX - 2f * zeta * omega * xDot - (omega * omega) * x;
@@ -75,13 +68,11 @@ public final class LanternSwingState {
         z += zDot * dtSec;
     }
 
-    public float getXRad() { return x; }
-    public float getZRad() { return z; }
+    
 
     public float getXDeg() { return (float) Math.toDegrees(x); }
     public float getZDeg() { return (float) Math.toDegrees(z); }
 
-    public float getPrevXDeg() { return (float) Math.toDegrees(prevX); }
-    public float getPrevZDeg() { return (float) Math.toDegrees(prevZ); }
+    
 }
 
