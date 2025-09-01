@@ -179,7 +179,12 @@ public final class BLNeoForgeClient {
             }
 
             if (toggleLanternKey != null && toggleLanternKey.wasPressed()) {
-                PacketDistributor.sendToServer(new ToggleLanternPayload());
+                // Send our toggle request to the server using a direct custom payload packet.
+                // PacketDistributor lacks a sendToServer overload in this environment, so use the
+                // vanilla client network handler to transmit the payload.
+                if (mc.getNetworkHandler() != null) {
+                    mc.getNetworkHandler().send(new net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket(new ToggleLanternPayload()));
+                }
             }
 
             LanternClientLogic.tickLanternPhysics(mc);
