@@ -41,7 +41,7 @@ import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 
 import java.util.UUID;
 
-@EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)
 public final class BLNeoForgeClient {
     // no per-loader state; use common ClientBeltPlayers
 
@@ -106,7 +106,7 @@ public final class BLNeoForgeClient {
         for (var skin : event.getSkins()) {
             var renderer = event.getSkin(skin);
             if (renderer instanceof PlayerEntityRenderer per) {
-                per.addFeature(new LanternBeltFeatureRenderer<>(per));
+                per.addFeature(new LanternBeltFeatureRenderer((net.minecraft.client.render.entity.feature.FeatureRendererContext<?, ?>) per));
             }
         }
     }

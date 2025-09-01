@@ -22,7 +22,7 @@ import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
  * <p>Runs on both dedicated and integrated servers so the toggle payload is
  * handled in singleplayer as well.</p>
  */
-@EventBusSubscriber(modid = BLMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = BLMod.MOD_ID)
 public final class BLNeoForgeNetwork {
     private BLNeoForgeNetwork() {}
 
