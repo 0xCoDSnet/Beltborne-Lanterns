@@ -37,11 +37,12 @@ ext.resolveCurseforgeToken = {
 }
 
 tasks.register("publishCurseForgeAll") {
-    dependsOn(
-            ":modules:fabric:curseforge",
-            ":modules:neoforge:curseforge",
-            ":modules:quilt:curseforge",
-    )
+    // Depend only on existing platform subprojects
+    ["fabric", "neoforge", "quilt"].each { plat ->
+        if (findProject(":modules:${plat}") != null) {
+            dependsOn(":modules:${plat}:curseforge")
+        }
+    }
 }
 // ====================================================
 
@@ -67,11 +68,12 @@ ext.resolveModrinthToken = {
 
 // один таск на всё
 tasks.register("publishModrinthAll") {
-    dependsOn(
-            ":modules:fabric:modrinth",
-            ":modules:neoforge:modrinth",
-            ":modules:quilt:modrinth",
-    )
+    // Depend only on existing platform subprojects
+    ["fabric", "neoforge", "quilt"].each { plat ->
+        if (findProject(":modules:${plat}") != null) {
+            dependsOn(":modules:${plat}:modrinth")
+        }
+    }
 }
 
 subprojects {
