@@ -7,9 +7,9 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.RotationAxis;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
@@ -17,29 +17,28 @@ import net.oxcodsnet.beltborne_lanterns.common.config.BLConfig;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLConfigs;
 import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 
-public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
+public class LanternBeltFeatureRenderer extends FeatureRenderer<PlayerEntityRenderState, PlayerEntityModel> {
 
     // The lantern model might need a rotation adjustment to face forward.
     private static final float MODEL_Y_ROTATION_DEGREES = 180f;
 
-    public LanternBeltFeatureRenderer(FeatureRendererContext<T, M> context) {
-        super(context);
+    @SuppressWarnings("unchecked")
+    public LanternBeltFeatureRenderer(FeatureRendererContext<?, ?> context) {
+        // Cast to the exact generic pair expected by the superclass.
+        super((FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel>) context);
     }
 
     @Override
-    public void render(
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
-            int light,
-            T entity,
-            float limbAngle,
-            float limbDistance,
-            float tickDelta,
-            float animationProgress,
-            float headYaw,
-            float headPitch
-    ) {
-        if (!(entity instanceof PlayerEntity player)) return;
+    public void render(MatrixStack matrices,
+                       VertexConsumerProvider vertexConsumers,
+                       int light,
+                       PlayerEntityRenderState state,
+                       float limbAngle,
+                       float limbDistance) {
+        // MC 1.21+ feature renderers receive a render-state, not the entity.
+        // Use local player as a fallback context to keep feature functional.
+        PlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) return;
         if (!BLClientAbstractions.clientHasLantern(player)) return;
 
         BLConfig c = BLConfigs.get();
@@ -80,10 +79,9 @@ public class LanternBeltFeatureRenderer<T extends LivingEntity, M extends BipedE
         matrices.translate(-pivX, -pivY, -pivZ);
 
         BlockRenderManager brm = MinecraftClient.getInstance().getBlockRenderManager();
-        BlockState state = LampRegistry.getState(BLClientAbstractions.clientLamp(player));
-        brm.renderBlockAsEntity(state, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
+        BlockState blockState = LampRegistry.getState(BLClientAbstractions.clientLamp(player));
+        brm.renderBlockAsEntity(blockState, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
 
         matrices.pop();
     }
 }
-

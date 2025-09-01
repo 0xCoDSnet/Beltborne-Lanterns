@@ -106,7 +106,7 @@ public final class BLNeoForgeClient {
         for (var skin : event.getSkins()) {
             var renderer = event.getSkin(skin);
             if (renderer instanceof PlayerEntityRenderer per) {
-                per.addFeature(new LanternBeltFeatureRenderer<>(per));
+                per.addFeature(new LanternBeltFeatureRenderer((net.minecraft.client.render.entity.feature.FeatureRendererContext<?, ?>) per));
             }
         }
     }
