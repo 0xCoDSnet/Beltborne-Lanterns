@@ -64,9 +64,9 @@ public final class BLLanguage {
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotation Z (deg)");
         add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Scale (%)");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Extra Lamps");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry", "Lamp Entry");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.id", "Item ID");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.luminance", "Luminance");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Lamp Entry");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "Item ID");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.luminance", "Luminance");
     }
 
     private static void fillRu(BiConsumer<String, String> add) {
@@ -97,9 +97,9 @@ public final class BLLanguage {
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Вращение Z (град)");
         add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Масштаб (%)");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Дополнительные лампы");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry", "Запись о лампе");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.id", "ID Предмета");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.luminance", "Яркость");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Запись о лампе");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID Предмета");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.luminance", "Яркость");
     }
 
     private static void fillEs(BiConsumer<String, String> add) {
@@ -130,9 +130,9 @@ public final class BLLanguage {
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotación Z (grados)");
         add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Escala (%)");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Lámparas Adicionales");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry", "Entrada de Lámpara");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.id", "ID del Objeto");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.luminance", "Luminancia");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Entrada de Lámpara");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID del Objeto");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.luminance", "Luminancia");
     }
 
     private static void fillFr(BiConsumer<String, String> add) {
@@ -163,9 +163,9 @@ public final class BLLanguage {
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotation Z (deg)");
         add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Échelle (%)");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Lampes Supplémentaires");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry", "Entrée de Lampe");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.id", "ID de l'objet");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.luminance", "Luminance");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Entrée de Lampe");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID de l'objet");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.luminance", "Luminance");
     }
 
     private static void fillDe(BiConsumer<String, String> add) {
@@ -196,9 +196,9 @@ public final class BLLanguage {
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotation Z (Grad)");
         add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Skalierung (%)");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Zusätzliche Lampen");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry", "Lampeneintrag");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.id", "Gegenstand-ID");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.luminance", "Leuchtkraft");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Lampeneintrag");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "Gegenstand-ID");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.luminance", "Leuchtkraft");
     }
 
     private static void fillZh(BiConsumer<String, String> add) {
@@ -229,9 +229,9 @@ public final class BLLanguage {
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "旋转 Z (度)");
         add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "缩放 (%)");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "额外灯笼");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry", "灯笼条目");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.id", "物品 ID");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.luminance", "亮度");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "灯笼条目");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "物品 ID");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.luminance", "亮度");
     }
 
     private static void fillUk(BiConsumer<String, String> add) {
@@ -262,8 +262,8 @@ public final class BLLanguage {
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Обертання Z (град)");
         add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Масштаб (%)");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Додаткові лампи");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry", "Запис про лампу");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.id", "ID Предмета");
-        add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight.ExtraLampEntry.luminance", "Яскравість");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Запис про лампу");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID Предмета");
+        add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.luminance", "Яскравість");
     }
 }
