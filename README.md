@@ -28,6 +28,13 @@
   </a>
 </p>
 
+<p align="center" style="display:flex;justify-content:center;gap:8px;margin:6px 0;">
+  <a href="https://discord.gg/9JRb3JMAD3" target="_blank" rel="noopener">
+    <img alt="discord-plural" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy-minimal/social/discord-plural_vector.svg">
+  </a>
+</p>
+
+
 # Beltborne Lanterns — free hands, bright path
 
 Press **B** while holding a lantern — it snaps onto your belt. Walk, jump, fight — the lantern **sways with physics** and *casts light near you.*
