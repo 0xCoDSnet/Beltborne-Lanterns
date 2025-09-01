@@ -1,6 +1,7 @@
 package net.oxcodsnet.beltborne_lanterns.neoforge.client;
 
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
+import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -57,6 +58,7 @@ public final class BLNeoForgeClient {
         // Load the lamp registry from the client's config file on startup.
         // This makes the config screen work before joining a world.
         LampRegistry.init();
+        BLMod.LOGGER.info("Client initialization started [NeoForge]");
 
         // Provide platform bridges for common renderer
         BLClientAbstractions.init(ClientBeltPlayers::getLamp);
@@ -95,6 +97,7 @@ public final class BLNeoForgeClient {
         event.register(toggleDebugKey);
         event.register(openDebugEditorKey);
         event.register(toggleLanternKey);
+        BLMod.LOGGER.info("Client ready [NeoForge].");
     }
 
     @SubscribeEvent

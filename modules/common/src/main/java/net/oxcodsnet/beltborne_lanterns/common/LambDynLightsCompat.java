@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.function.Function;
 
+import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 
 /**
@@ -38,6 +39,7 @@ public final class LambDynLightsCompat {
 
             Method register = handlersClass.getMethod("registerDynamicLightHandler", EntityType.class, handlerClass);
             register.invoke(null, EntityType.PLAYER, livingHandler);
+            BLMod.LOGGER.info("Dynamic lights: integrated via LambDynamicLights API (handler)");
         } catch (ReflectiveOperationException ignored) {
             try {
                 Class<?> lambClass = Class.forName("dev.lambdaurora.lambdynlights.LambDynLights");
@@ -99,8 +101,10 @@ public final class LambDynLightsCompat {
 
                 Method register = eventClass.getMethod("register", Object.class, Object.class);
                 register.invoke(event, identifier, listener);
+                BLMod.LOGGER.info("Dynamic lights: integrated via LambDynamicLights API (event)");
             } catch (ReflectiveOperationException ignored2) {
                 // If the API isn't present or changes, simply skip integration.
+                BLMod.LOGGER.debug("Dynamic lights: LambDynamicLights not present; skipping integration");
             }
         }
     }

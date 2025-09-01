@@ -1,5 +1,6 @@
 package net.oxcodsnet.beltborne_lanterns.fabric.client;
 
+import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -45,6 +46,7 @@ public final class BLFabricClient implements ClientModInitializer {
         // Load the lamp registry from the client's config file on startup.
         // This makes the config screen work before joining a world.
         LampRegistry.init();
+        BLMod.LOGGER.info("Client initialization started [Fabric]");
 
         // Register network receiver: updates local client set
         ClientPlayNetworking.registerGlobalReceiver(BeltSyncPayload.ID, (payload, context) -> {
@@ -86,9 +88,8 @@ public final class BLFabricClient implements ClientModInitializer {
         });
 
         // Optionally register dynamic lights for the belt lantern when LambDynamicLights is present
-        if (FabricLoader.getInstance().isModLoaded("lambdynlights")) {
-            LambDynLightsCompat.init();
-        }
+        boolean hasLamb = FabricLoader.getInstance().isModLoaded("lambdynlights");
+        if (hasLamb) LambDynLightsCompat.init();
 
         // Keybind to open config (default: L)
         openConfigKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -149,6 +150,10 @@ public final class BLFabricClient implements ClientModInitializer {
             // Update lantern physics states for players who have a belt lantern
             LanternClientLogic.tickLanternPhysics(client);
         });
+
+        // Final client-ready log (concise, useful to players)
+        String dyn = hasLamb ? "enabled" : "disabled";
+        BLMod.LOGGER.info("Client ready [Fabric]. Dynamic lights: {}.", dyn);
     }
 
     // Debug flag is maintained via BLClientAbstractions

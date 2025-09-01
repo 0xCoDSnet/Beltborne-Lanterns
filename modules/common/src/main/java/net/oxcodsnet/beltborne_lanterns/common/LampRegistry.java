@@ -49,14 +49,11 @@ public final class LampRegistry {
 
         // Dynamically register any additional tagged items
         Registries.ITEM.getEntryList(EXTRA_LAMPS_TAG).ifPresent(list -> {
-
-            BLMod.LOGGER.info("Found {} entries in #{}:lamps", list.size(), BLMod.MOD_ID);
-
+            // Keep discovery log at debug level to avoid spam
+            BLMod.LOGGER.debug("Found {} entries in #{}:lamps", list.size(), BLMod.MOD_ID);
             for (RegistryEntry<Item> entry : list) {
-
                 Identifier id = Registries.ITEM.getId(entry.value());
-                BLMod.LOGGER.info(" - {}", id);
-
+                BLMod.LOGGER.debug(" - {}", id);
                 Item item = entry.value();
                 if (LAMPS.containsKey(item)) continue;
                 if (item instanceof BlockItem blockItem) {
@@ -83,6 +80,14 @@ public final class LampRegistry {
             }
             register(item, state, entry.luminance);
         });
+
+        // Final summary (info level): total, builtin vs extras
+        int total = LAMPS.size();
+        int builtin = 0;
+        if (LAMPS.containsKey(Items.LANTERN)) builtin++;
+        if (LAMPS.containsKey(Items.SOUL_LANTERN)) builtin++;
+        int extras = Math.max(0, total - builtin);
+        BLMod.LOGGER.info("Lamp registry ready: {} items ({} builtin, {} extra)", total, builtin, extras);
     }
 
     private static int clampLuminance(int lum) {
