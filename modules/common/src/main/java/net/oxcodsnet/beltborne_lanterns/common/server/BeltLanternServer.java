@@ -33,14 +33,14 @@ public final class BeltLanternServer {
                 stackInHand.decrement(1);
             }
             BeltState.setLamp(player, item);
-            BeltLanternSave.get(player.server).set(player.getUuid(), item);
+            BeltLanternSave.get(player.getServer()).set(player.getUuid(), item);
             return item;
         } else {
             if (!creative) {
                 player.giveItemStack(new ItemStack(current));
             }
             BeltState.setLamp(player, null);
-            BeltLanternSave.get(player.server).set(player.getUuid(), null);
+            BeltLanternSave.get(player.getServer()).set(player.getUuid(), null);
             return null;
         }
     }
@@ -62,8 +62,7 @@ public final class BeltLanternServer {
         }
         player.giveOrDropStack(new ItemStack(lamp));
         BeltState.setLamp(player, null);
-        BeltLanternSave.get(player.server).set(player.getUuid(), null);
+        BeltLanternSave.get(player.getServer()).set(player.getUuid(), null);
         return null;
     }
 }
-

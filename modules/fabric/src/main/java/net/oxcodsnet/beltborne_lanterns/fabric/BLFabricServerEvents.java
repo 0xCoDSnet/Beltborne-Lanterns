@@ -76,7 +76,7 @@ public final class BLFabricServerEvents {
         // Handle lamp drop/persistence on death and sync after respawn
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             if (alive) return;
-            boolean keep = oldPlayer.getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+            boolean keep = oldPlayer.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
             BeltLanternServer.handleDeath(oldPlayer, keep);
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {

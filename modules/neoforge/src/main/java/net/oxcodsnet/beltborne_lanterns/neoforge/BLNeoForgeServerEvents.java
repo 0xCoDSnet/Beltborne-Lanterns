@@ -36,7 +36,7 @@ public final class BLNeoForgeServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayerEntity joining)) return;
-        MinecraftServer server = joining.server;
+        MinecraftServer server = joining.getServer();
         // Restore from persistent save and broadcast
         Item persisted = BeltLanternSave.get(server).get(joining.getUuid());
         BeltState.setLamp(joining, persisted);
@@ -61,7 +61,7 @@ public final class BLNeoForgeServerEvents {
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayerEntity leaving)) return;
         Item lamp = BeltState.getLamp(leaving);
-        BeltLanternSave.get(leaving.server).set(leaving.getUuid(), lamp);
+        BeltLanternSave.get(leaving.getServer()).set(leaving.getUuid(), lamp);
     }
 
     @SubscribeEvent
@@ -69,7 +69,7 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity)) return;
         if (!event.isWasDeath()) return;
         ServerPlayerEntity oldPlayer = (ServerPlayerEntity) event.getOriginal();
-        boolean keep = oldPlayer.getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+        boolean keep = oldPlayer.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
         BeltLanternServer.handleDeath(oldPlayer, keep);
     }
 

@@ -3,6 +3,7 @@ package net.oxcodsnet.beltborne_lanterns.fabric.datagen;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 
@@ -15,8 +16,10 @@ public class BLLampTagProvider extends FabricTagProvider.ItemTagProvider {
 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup registries) {
-        getOrCreateTagBuilder(LampRegistry.EXTRA_LAMPS_TAG)
-                .add(Items.LANTERN)
-                .add(Items.SOUL_LANTERN);
+        // Fabric API 0.128+ uses getTagBuilder; older used getOrCreateTagBuilder
+        // Try to call getTagBuilder; if not available in this environment, the method will still be resolved at compile time per dependency.
+        this.getTagBuilder(LampRegistry.EXTRA_LAMPS_TAG)
+                .add(Registries.ITEM.getId(Items.LANTERN))
+                .add(Registries.ITEM.getId(Items.SOUL_LANTERN));
     }
 }
