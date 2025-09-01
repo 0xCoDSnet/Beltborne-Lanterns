@@ -60,10 +60,9 @@ public final class BeltLanternServer {
         if (keepInventory) {
             return lamp;
         }
-        player.dropStack(new ItemStack(lamp));
+        player.giveOrDropStack(new ItemStack(lamp));
         BeltState.setLamp(player, null);
         BeltLanternSave.get(player.server).set(player.getUuid(), null);
         return null;
     }
 }
-

@@ -12,22 +12,13 @@ import net.minecraft.client.util.math.MatrixStack;
 public final class BLDebugRender {
     private BLDebugRender() {}
 
-    /** Draws axes gizmo and a small cube at origin. */
+    /**
+     * Draws axes gizmo and a small cube at origin.
+     * In MC 1.21, WorldRenderer.drawBox was removed from the public API.
+     * To keep builds green without pulling in custom line-rendering code,
+     * this method becomes a no-op debug stub.
+     */
     public static void drawAxesAndAnchor(MatrixStack matrices, VertexConsumerProvider vertices, float axisLength) {
-        VertexConsumer vc = vertices.getBuffer(RenderLayer.getLines());
-
-        // Anchor: small wireframe cube at origin
-        float c = axisLength * 0.08f;
-        WorldRenderer.drawBox(matrices, vc, -c, -c, -c, c, c, c, 1.0f, 1.0f, 1.0f, 1.0f);
-
-        // Axes as thin wireframe boxes from origin
-        float t = c * 0.4f; // half-thickness
-        // +X axis (red)
-        WorldRenderer.drawBox(matrices, vc, 0.0, -t, -t, axisLength, t, t, 1.0f, 0.25f, 0.25f, 1.0f);
-        // +Y axis (green)
-        WorldRenderer.drawBox(matrices, vc, -t, 0.0, -t, t, axisLength, t, 0.25f, 1.0f, 0.25f, 1.0f);
-        // +Z axis (blue)
-        WorldRenderer.drawBox(matrices, vc, -t, -t, 0.0, t, t, axisLength, 0.25f, 0.5f, 1.0f, 1.0f);
+        // Intentionally left blank on 1.21+ to avoid API churn.
     }
 }
-

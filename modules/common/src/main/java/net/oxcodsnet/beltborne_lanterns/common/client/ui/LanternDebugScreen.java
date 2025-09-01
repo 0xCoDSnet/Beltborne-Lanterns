@@ -196,7 +196,7 @@ public class LanternDebugScreen extends Screen {
     }
 
     @Override
-    protected void applyBlur(float delta) {
+    protected void applyBlur() {
         // keep world visible
     }
 

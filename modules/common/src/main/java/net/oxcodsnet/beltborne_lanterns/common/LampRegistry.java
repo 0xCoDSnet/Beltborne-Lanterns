@@ -47,11 +47,11 @@ public final class LampRegistry {
         register(Items.LANTERN, Blocks.LANTERN.getDefaultState().with(Properties.HANGING, false));
         register(Items.SOUL_LANTERN, Blocks.SOUL_LANTERN.getDefaultState().with(Properties.HANGING, false));
 
-        // Dynamically register any additional tagged items
-        Registries.ITEM.getEntryList(EXTRA_LAMPS_TAG).ifPresent(list -> {
-            // Keep discovery log at debug level to avoid spam
-            BLMod.LOGGER.debug("Found {} entries in #{}:lamps", list.size(), BLMod.MOD_ID);
-            for (RegistryEntry<Item> entry : list) {
+        // Dynamically register any additional tagged items (MC 1.21+: iterateEntries)
+        try {
+            int discovered = 0;
+            for (RegistryEntry<Item> entry : Registries.ITEM.iterateEntries(EXTRA_LAMPS_TAG)) {
+                discovered++;
                 Identifier id = Registries.ITEM.getId(entry.value());
                 BLMod.LOGGER.debug(" - {}", id);
                 Item item = entry.value();
@@ -64,7 +64,13 @@ public final class LampRegistry {
                     register(item, state);
                 }
             }
-        });
+            if (discovered > 0) {
+                BLMod.LOGGER.debug("Found {} entries in #{}:lamps", discovered, BLMod.MOD_ID);
+            }
+        } catch (IllegalStateException notBound) {
+            // Tags are not yet bound (e.g. very early client init). Skip gracefully.
+            BLMod.LOGGER.debug("Tags not bound yet; skipping tag-based lamps for now");
+        }
 
         // Register additional lamps from config with custom luminance
         var cfg = BLLampConfigAccess.get();

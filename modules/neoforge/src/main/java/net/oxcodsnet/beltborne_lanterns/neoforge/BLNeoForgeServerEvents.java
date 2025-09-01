@@ -69,7 +69,7 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity)) return;
         if (!event.isWasDeath()) return;
         ServerPlayerEntity oldPlayer = (ServerPlayerEntity) event.getOriginal();
-        boolean keep = oldPlayer.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+        boolean keep = oldPlayer.getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
         BeltLanternServer.handleDeath(oldPlayer, keep);
     }
 

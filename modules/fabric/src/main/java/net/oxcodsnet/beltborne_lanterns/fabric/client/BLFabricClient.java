@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -47,6 +48,11 @@ public final class BLFabricClient implements ClientModInitializer {
         // This makes the config screen work before joining a world.
         LampRegistry.init();
         BLMod.LOGGER.info("Client initialization started [Fabric]");
+
+        // Rebuild registry after client joins a server (tags/registries are synced at this point)
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            client.execute(LampRegistry::init);
+        });
 
         // Register network receiver: updates local client set
         ClientPlayNetworking.registerGlobalReceiver(BeltSyncPayload.ID, (payload, context) -> {
