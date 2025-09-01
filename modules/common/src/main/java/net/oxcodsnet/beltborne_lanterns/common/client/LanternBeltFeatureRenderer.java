@@ -11,6 +11,7 @@ import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.RotationAxis;
@@ -47,8 +48,8 @@ public class LanternBeltFeatureRenderer extends FeatureRenderer<PlayerEntityRend
 
         matrices.push();
 
-        // Attach to torso
-        this.getContextModel().body.rotate(matrices);
+        // Attach to torso (ModelPart#rotate(MatrixStack) was removed in 1.21.5)
+        applyModelPart(matrices, this.getContextModel().body);
 
         final float offX = c.fOffsetX();
         final float offY = c.fOffsetY();
@@ -86,5 +87,9 @@ public class LanternBeltFeatureRenderer extends FeatureRenderer<PlayerEntityRend
 
         matrices.pop();
     }
-}
 
+    private static void applyModelPart(MatrixStack matrices, ModelPart part) {
+        // Apply the part's origin and rotation to the matrix stack
+        part.applyTransform(matrices);
+    }
+}
