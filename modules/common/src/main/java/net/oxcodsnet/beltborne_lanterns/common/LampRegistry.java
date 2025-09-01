@@ -48,23 +48,28 @@ public final class LampRegistry {
         register(Items.SOUL_LANTERN, Blocks.SOUL_LANTERN.getDefaultState().with(Properties.HANGING, false));
 
         // Dynamically register any additional tagged items (MC 1.21+: iterateEntries)
-        int discovered = 0;
-        for (RegistryEntry<Item> entry : Registries.ITEM.iterateEntries(EXTRA_LAMPS_TAG)) {
-            discovered++;
-            Identifier id = Registries.ITEM.getId(entry.value());
-            BLMod.LOGGER.debug(" - {}", id);
-            Item item = entry.value();
-            if (LAMPS.containsKey(item)) continue;
-            if (item instanceof BlockItem blockItem) {
-                BlockState state = blockItem.getBlock().getDefaultState();
-                if (state.contains(Properties.HANGING)) {
-                    state = state.with(Properties.HANGING, false);
+        try {
+            int discovered = 0;
+            for (RegistryEntry<Item> entry : Registries.ITEM.iterateEntries(EXTRA_LAMPS_TAG)) {
+                discovered++;
+                Identifier id = Registries.ITEM.getId(entry.value());
+                BLMod.LOGGER.debug(" - {}", id);
+                Item item = entry.value();
+                if (LAMPS.containsKey(item)) continue;
+                if (item instanceof BlockItem blockItem) {
+                    BlockState state = blockItem.getBlock().getDefaultState();
+                    if (state.contains(Properties.HANGING)) {
+                        state = state.with(Properties.HANGING, false);
+                    }
+                    register(item, state);
                 }
-                register(item, state);
             }
-        }
-        if (discovered > 0) {
-            BLMod.LOGGER.debug("Found {} entries in #{}:lamps", discovered, BLMod.MOD_ID);
+            if (discovered > 0) {
+                BLMod.LOGGER.debug("Found {} entries in #{}:lamps", discovered, BLMod.MOD_ID);
+            }
+        } catch (IllegalStateException notBound) {
+            // Tags are not yet bound (e.g. very early client init). Skip gracefully.
+            BLMod.LOGGER.debug("Tags not bound yet; skipping tag-based lamps for now");
         }
 
         // Register additional lamps from config with custom luminance
