@@ -119,7 +119,7 @@ public final class BLFabricClient implements ClientModInitializer {
         ));
 
         // Wire platform abstractions so common renderer can query state/debug
-        BLClientAbstractions.init(ClientBeltPlayers::getLamp, BLClientAbstractions::isDebugDrawEnabled);
+        BLClientAbstractions.init(ClientBeltPlayers::getLamp);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKey.wasPressed()) {

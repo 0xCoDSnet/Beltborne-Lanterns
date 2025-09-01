@@ -59,7 +59,7 @@ public final class BLNeoForgeClient {
         LampRegistry.init();
 
         // Provide platform bridges for common renderer
-        BLClientAbstractions.init(ClientBeltPlayers::getLamp, BLClientAbstractions::isDebugDrawEnabled);
+        BLClientAbstractions.init(ClientBeltPlayers::getLamp);
 
 
         // Register the config screen with NeoForge's extension point
@@ -137,7 +137,8 @@ public final class BLNeoForgeClient {
                     });
                 }
         );
-        registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
+        // C2S payloads are registered in BLNeoForgeNetwork
+        // registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
     }
 
     @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)

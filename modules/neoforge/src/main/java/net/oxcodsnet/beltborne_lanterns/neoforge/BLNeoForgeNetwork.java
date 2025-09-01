@@ -30,8 +30,9 @@ public final class BLNeoForgeNetwork {
     public static void register(RegisterPayloadHandlersEvent event) {
         // Register payloads (network version "1")
         var registrar = event.registrar("1");
-        registrar.playToClient(BeltSyncPayload.ID, BeltSyncPayload.CODEC, (payload, ctx) -> { /* no-op on server */ });
-        registrar.playToClient(LampConfigSyncPayload.ID, LampConfigSyncPayload.CODEC, (payload, ctx) -> { /* no-op */ });
+        // S2C payloads are registered in BLNeoForgeClient
+        // registrar.playToClient(BeltSyncPayload.ID, BeltSyncPayload.CODEC, (payload, ctx) -> { /* no-op on server */ });
+        // registrar.playToClient(LampConfigSyncPayload.ID, LampConfigSyncPayload.CODEC, (payload, ctx) -> { /* no-op */ });
         registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) ctx.player();
             ctx.enqueueWork(() -> {

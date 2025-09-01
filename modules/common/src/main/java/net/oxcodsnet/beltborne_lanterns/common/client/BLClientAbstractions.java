@@ -5,9 +5,7 @@ import net.minecraft.item.Item;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Small indirection layer for platform-specific client bits.
@@ -16,18 +14,10 @@ import java.util.function.Supplier;
 public final class BLClientAbstractions {
     private static volatile Function<PlayerEntity, Item> lampProvider = p -> null;
     private static final AtomicBoolean DEBUG_FLAG = new AtomicBoolean(false);
-    private static volatile Supplier<Boolean> debugEnabled = DEBUG_FLAG::get;
-    private static volatile Consumer<Boolean> debugSetter = DEBUG_FLAG::set;
-
     private BLClientAbstractions() {}
 
-    public static void init(Function<PlayerEntity, Item> lampFunc, Supplier<Boolean> debugSupplier) {
+    public static void init(Function<PlayerEntity, Item> lampFunc) {
         lampProvider = Objects.requireNonNull(lampFunc);
-        // Keep using the internal atomic debug flag; ignore external supplier to avoid self-recursion.
-    }
-
-    public static void setDebugSetter(Consumer<Boolean> setter) {
-        debugSetter = Objects.requireNonNull(setter);
     }
 
     public static boolean clientHasLantern(PlayerEntity player) {
@@ -39,10 +29,10 @@ public final class BLClientAbstractions {
     }
 
     public static boolean isDebugDrawEnabled() {
-        return debugEnabled.get();
+        return DEBUG_FLAG.get();
     }
 
     public static void setDebugDrawEnabled(boolean enabled) {
-        debugSetter.accept(enabled);
+        DEBUG_FLAG.set(enabled);
     }
 }
