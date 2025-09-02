@@ -82,12 +82,12 @@ public class LanternDebugScreen extends Screen {
 
         // Section (right): Scale + Step
         addDrawableChild(ButtonWidget.builder(Text.literal("Scale -"), b -> {
-            cfg.scale100 = Math.max(1, cfg.scale100 - scaledScaleStep100());
+            cfg.scale100 = Math.max(1, cfg.scale100 - scaledStep100());
             save.run();
             refreshCopyPreview();
         }).dimensions(rightX, top + rightRow * 22, 70, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Scale +"), b -> {
-            cfg.scale100 += scaledScaleStep100();
+            cfg.scale100 += scaledStep100();
             save.run();
             refreshCopyPreview();
         }).dimensions(rightX + 74, top + rightRow * 22, 70, 20).build());
@@ -109,15 +109,8 @@ public class LanternDebugScreen extends Screen {
     }
 
     private int scaledStep100() {
-        float base = STEP_PRESETS[stepIndex] * 100f;
-        float mul = 1.0f;
-        if (hasShiftDown()) mul *= 10f;
-        if (hasControlDown()) mul *= 0.1f;
-        return Math.max(1, Math.round(base * mul));
-    }
-
-    private int scaledScaleStep100() {
-        float base = 5f; // 0.05
+        // Use 1/1000 precision so 0.005/0.025 steps are exact
+        float base = STEP_PRESETS[stepIndex] * 1000f;
         float mul = 1.0f;
         if (hasShiftDown()) mul *= 10f;
         if (hasControlDown()) mul *= 0.1f;
@@ -142,14 +135,14 @@ public class LanternDebugScreen extends Screen {
 
     private void refreshCopyPreview() {
         BLClientConfig c = BLClientConfigAccess.get();
-        String s = String.format("off(%.2f,%.2f,%.2f) piv(%.2f,%.2f,%.2f) rot(%d,%d,%d) sc(%.2f)",
+        String s = String.format("off(%.3f,%.3f,%.3f) piv(%.3f,%.3f,%.3f) rot(%d,%d,%d) sc(%.3f)",
                 c.fOffsetX(), c.fOffsetY(), c.fOffsetZ(), c.fPivotX(), c.fPivotY(), c.fPivotZ(), c.rotXDeg, c.rotYDeg, c.rotZDeg, c.fScale());
         if (copyPreviewField != null) copyPreviewField.setText(s);
     }
 
     private void copyValuesToClipboard() {
         BLClientConfig c = BLClientConfigAccess.get();
-        String jsonish = String.format("{offset:[%.2f,%.2f,%.2f], pivot:[%.2f,%.2f,%.2f], rot:[%d,%d,%d], scale:%.2f}",
+        String jsonish = String.format("{offset:[%.3f,%.3f,%.3f], pivot:[%.3f,%.3f,%.3f], rot:[%d,%d,%d], scale:%.3f}",
                 c.fOffsetX(), c.fOffsetY(), c.fOffsetZ(), c.fPivotX(), c.fPivotY(), c.fPivotZ(), c.rotXDeg, c.rotYDeg, c.rotZDeg, c.fScale());
         MinecraftClient.getInstance().keyboard.setClipboard(jsonish);
     }
@@ -183,8 +176,8 @@ public class LanternDebugScreen extends Screen {
             case 76: cfg.pivotY100 -= scaledStep100(); used = true; break;
             case 80: cfg.pivotZ100 += scaledStep100(); used = true; break;
             case 59: cfg.pivotZ100 -= scaledStep100(); used = true; break;
-            case 85: cfg.scale100 += scaledScaleStep100(); used = true; break;
-            case 74: cfg.scale100 = Math.max(1, cfg.scale100 - scaledScaleStep100()); used = true; break;
+            case 85: cfg.scale100 += scaledStep100(); used = true; break;
+            case 74: cfg.scale100 = Math.max(1, cfg.scale100 - scaledStep100()); used = true; break;
             default: break;
         }
         if (used) {
@@ -195,10 +188,7 @@ public class LanternDebugScreen extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    @Override
-    protected void applyBlur() {
-        // keep world visible
-    }
+    // No blur override in this version; keep world visible by default
 
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
@@ -208,13 +198,13 @@ public class LanternDebugScreen extends Screen {
         int y = 10;
         ctx.drawText(this.textRenderer, Text.literal("Lantern Debug (hold Shift=×10, Ctrl=×0.1)" ).formatted(Formatting.YELLOW), x, y, 0xFFFFFF, false);
         y += 14;
-        ctx.drawText(this.textRenderer, Text.literal(String.format("Offset: X=%.2f Y=%.2f Z=%.2f", c.fOffsetX(), c.fOffsetY(), c.fOffsetZ())), x, y, 0xFFFFFF, false);
+        ctx.drawText(this.textRenderer, Text.literal(String.format("Offset: X=%.3f Y=%.3f Z=%.3f", c.fOffsetX(), c.fOffsetY(), c.fOffsetZ())), x, y, 0xFFFFFF, false);
         y += 12;
-        ctx.drawText(this.textRenderer, Text.literal(String.format("Pivot:  X=%.2f Y=%.2f Z=%.2f", c.fPivotX(), c.fPivotY(), c.fPivotZ())), x, y, 0xFFFFFF, false);
+        ctx.drawText(this.textRenderer, Text.literal(String.format("Pivot:  X=%.3f Y=%.3f Z=%.3f", c.fPivotX(), c.fPivotY(), c.fPivotZ())), x, y, 0xFFFFFF, false);
         y += 12;
         ctx.drawText(this.textRenderer, Text.literal(String.format("Rot:    X=%d Y=%d Z=%d", c.rotXDeg, c.rotYDeg, c.rotZDeg)), x, y, 0xFFFFFF, false);
         y += 12;
-        ctx.drawText(this.textRenderer, Text.literal(String.format("Scale:  %.2f", c.fScale())), x, y, 0xFFFFFF, false);
+        ctx.drawText(this.textRenderer, Text.literal(String.format("Scale:  %.3f", c.fScale())), x, y, 0xFFFFFF, false);
     }
 
     @Override

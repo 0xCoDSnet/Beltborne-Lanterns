@@ -22,6 +22,26 @@ public final class BLClientConfigAccess {
             AutoConfig.register(BLClientConfig.class, GsonConfigSerializer::new);
             HOLDER = AutoConfig.getConfigHolder(BLClientConfig.class);
             BLClientConfig clientConfig = HOLDER.getConfig();
+
+            // Migrate from 1/100 to 1/1000 precision if old values are detected
+            boolean looksLikeOldScale =
+                    Math.abs(clientConfig.offsetX100) <= 200 &&
+                    Math.abs(clientConfig.offsetY100) <= 200 &&
+                    Math.abs(clientConfig.offsetZ100) <= 200 &&
+                    Math.abs(clientConfig.pivotX100)  <= 200 &&
+                    Math.abs(clientConfig.pivotY100)  <= 200 &&
+                    Math.abs(clientConfig.pivotZ100)  <= 200 &&
+                    clientConfig.scale100 <= 100;
+            if (looksLikeOldScale) {
+                clientConfig.offsetX100 *= 10;
+                clientConfig.offsetY100 *= 10;
+                clientConfig.offsetZ100 *= 10;
+                clientConfig.pivotX100  *= 10;
+                clientConfig.pivotY100  *= 10;
+                clientConfig.pivotZ100  *= 10;
+                clientConfig.scale100   *= 10;
+                HOLDER.save();
+            }
             clientConfig.extraLampLight.clear(); // Clear existing to avoid duplicates on re-init
 
             java.util.Map<String, BLClientConfig.ExtraLampEntry> tempMap = new java.util.LinkedHashMap<>();

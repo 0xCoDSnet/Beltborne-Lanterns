@@ -44,10 +44,11 @@ public final class BLFabricServerEvents {
         // When a player joins, sync known belt states of all players to them and restore theirs
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity joining = handler.getPlayer();
-            // Restore from persistent save
-            Item persisted = BeltLanternSave.get(server).get(joining.getUuid());
-            BeltState.setLamp(joining, persisted);
-            // Tell everyone (and self) about joining player's state
+            // Restore from persistent save (full stack with NBT)
+            var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
+            Item persisted = persistedStack != null ? persistedStack.getItem() : null;
+            BeltState.setLamp(joining, persistedStack);
+            // Tell everyone (and self) about joining player's state (by item type)
             BeltNetworking.broadcastBeltState(joining, persisted);
             // If on a dedicated server, send its lamp config to the joining player.
             // In single player, the client's config is trusted as the source of truth.
@@ -69,15 +70,15 @@ public final class BLFabricServerEvents {
         // On disconnect, persist the current state for that player
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             ServerPlayerEntity leaving = handler.getPlayer();
-            Item lamp = BeltState.getLamp(leaving);
-            BeltLanternSave.get(server).set(leaving.getUuid(), lamp);
+            // Persist full stack with NBT on disconnect
+            BeltLanternSave.get(server).set(leaving.getUuid(), BeltState.getLampStack(leaving));
         });
 
         // Handle lamp drop/persistence on death and sync after respawn
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             if (alive) return;
             boolean keep = oldPlayer.getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
-            BeltLanternServer.handleDeath(oldPlayer, keep);
+            BeltLanternServer.handleDeath(oldPlayer, newPlayer, keep);
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
             if (alive) return;
