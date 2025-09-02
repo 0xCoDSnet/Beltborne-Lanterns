@@ -1,6 +1,5 @@
 package net.oxcodsnet.beltborne_lanterns.common.server;
 
-import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -76,19 +75,45 @@ public final class BeltLanternServer {
         // Drop the exact stored stack with NBT
         ItemStack stored = BeltState.getLampStack(player);
         if (stored != null && !stored.isEmpty()) {
-            player.dropStack(stored);
+            player.dropStack(player.getServerWorld(), stored);
         } else {
             ItemStack stack = new ItemStack(lamp);
-            ItemEntity itemEntity = new ItemEntity(oldPlayer.getServerWorld(), oldPlayer.getX(), oldPlayer.getY(), oldPlayer.getZ(), stack);
-            itemEntity.setPickupDelay(40);
-            oldPlayer.getServerWorld().spawnEntity(itemEntity);
-
-            BeltState.setLamp(oldPlayer, null);
-            BeltLanternSave.get(oldPlayer.server).set(oldPlayer.getUuid(), null);
+            player.dropStack(player.getServerWorld(), stack);
         }
         BeltState.setLamp(player, (ItemStack) null);
         BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
         return null;
     }
-}
 
+    /**
+     * Overload used by loader-specific events that provide both old and new players.
+     * Drops from the old player's location when keepInventory is false; otherwise preserves
+     * the lamp stack onto the new player.
+     */
+    public static void handleDeath(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, boolean keepInventory) {
+        Item lamp = BeltState.getLamp(oldPlayer);
+        if (lamp == null) {
+            // Ensure new player has no stale state
+            BeltState.setLamp(newPlayer, (ItemStack) null);
+            return;
+        }
+        if (keepInventory) {
+            ItemStack stored = BeltState.getLampStack(oldPlayer);
+            // Transfer the exact stack (including NBT) to the new player
+            BeltState.setLamp(newPlayer, stored);
+            BeltLanternSave.get(newPlayer.server).set(newPlayer.getUuid(), stored);
+            return;
+        }
+        // Drop from old player's position and clear state
+        ItemStack stored = BeltState.getLampStack(oldPlayer);
+        if (stored != null && !stored.isEmpty()) {
+            oldPlayer.dropStack(oldPlayer.getServerWorld(), stored);
+        } else {
+            oldPlayer.dropStack(oldPlayer.getServerWorld(), new ItemStack(lamp));
+        }
+        BeltState.setLamp(oldPlayer, (ItemStack) null);
+        BeltLanternSave.get(oldPlayer.server).set(oldPlayer.getUuid(), (ItemStack) null);
+        // Ensure new player does not carry over state
+        BeltState.setLamp(newPlayer, (ItemStack) null);
+    }
+}

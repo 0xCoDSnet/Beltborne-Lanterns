@@ -124,7 +124,7 @@ public final class BeltLanternSave extends PersistentState {
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         NbtCompound map = new NbtCompound();
         for (Map.Entry<UUID, ItemStack> e : playersWithLamps.entrySet()) {
-            NbtElement encoded = e.getValue().encode(registryLookup);
+            NbtElement encoded = e.getValue().toNbt(registryLookup);
             map.put(e.getKey().toString(), encoded);
         }
         nbt.put(PLAYERS_KEY, map);

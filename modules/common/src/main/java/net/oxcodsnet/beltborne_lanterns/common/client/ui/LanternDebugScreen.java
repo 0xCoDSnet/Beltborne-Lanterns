@@ -188,10 +188,7 @@ public class LanternDebugScreen extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    @Override
-    protected void applyBlur(float delta) {
-        // keep world visible
-    }
+    // No blur override in this version; keep world visible by default
 
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
