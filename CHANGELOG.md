@@ -1,4 +1,3 @@
 ## Changelog
 ### 🐞 Bug Fixes
-- Fixed an issue where NBT info could disappear from lanterns.
-- Resolved debug screen glitches and unexpected behavior.
+- Fixed synchronization bug between the client and the server
