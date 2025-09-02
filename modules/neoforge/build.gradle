@@ -42,7 +42,12 @@ dependencies {
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionNeoForge')
 
     // Optional: LambDynamicLights 4.x API for typed integration (compile-only)
-    modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${rootProject.lambdynamiclights_version}")
+    // Use Mojang-mapped capability to ensure generics are remappable to Yarn for NeoForge
+    modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${rootProject.lambdynamiclights_version}") {
+        capabilities {
+            requireCapability("dev.lambdaurora.lambdynamiclights:api-mojmap")
+        }
+    }
 }
 
 processResources {
