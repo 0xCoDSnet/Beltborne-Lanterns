@@ -23,8 +23,7 @@ public final class BLFabric implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
-        // Common compatibility loader
-        LambDynLightsCompat.init();
+        // LambDynamicLights integration is client-only; initialized from BLFabricClient.
 
         // Register payload types for networking.
         // These are common and need to be registered on both client and server.

@@ -22,6 +22,9 @@
     "client": [
       "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricClient"
     ],
+    "lambdynlights:initializer": [
+      "net.oxcodsnet.beltborne_lanterns.fabric.compat.LDL4FabricInitializer"
+    ],
     "modmenu": [
       "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricModMenu"
     ]

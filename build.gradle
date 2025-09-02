@@ -92,6 +92,10 @@ subprojects {
         maven { url = uri('https://maven.wispforest.io') }
         maven { url = uri('https://maven.terraformersmc.com/') }
         maven { url = uri('https://maven.shedaniel.me/') }
+        maven {
+            name = "Gegy"
+            url = uri("https://maven.gegy.dev")
+        }
     }
 
     dependencies {
