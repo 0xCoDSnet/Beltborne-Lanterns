@@ -111,39 +111,6 @@ public final class BLNeoForgeClient {
         }
     }
 
-    @SubscribeEvent
-    public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        // Register S2C payload for syncing which players have a belt lantern
-        var registrar = event.registrar("1"); // network version
-        registrar.playToClient(
-                BeltSyncPayload.ID,
-                BeltSyncPayload.CODEC,
-                (payload, ctx) -> {
-                    UUID uuid = payload.playerUuid();
-                    Item lamp = payload.lampId() != null ? Registries.ITEM.get(payload.lampId()) : null;
-                    ClientBeltPlayers.setLamp(uuid, lamp);
-                }
-        );
-        registrar.playToClient(
-                LampConfigSyncPayload.ID,
-                LampConfigSyncPayload.CODEC,
-                (payload, ctx) -> {
-                    // This receiver handles lamp configs sent from a dedicated server.
-                    ctx.enqueueWork(() -> {
-                        var cliCfg = BLClientConfigAccess.get();
-                        cliCfg.extraLampLight.clear();
-                        payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(id.toString(), lum)));
-                        BLClientConfigAccess.save();
-
-                        // Re-initialize the lamp registry with the new data from the server.
-                        LampRegistry.init();
-                    });
-                }
-        );
-        // C2S payloads are registered in BLNeoForgeNetwork
-        // registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
-    }
-
     @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)
     public static final class ClientBus {
         private ClientBus() {}
