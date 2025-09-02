@@ -37,9 +37,10 @@ public final class BLNeoForgeServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayerEntity joining)) return;
         MinecraftServer server = joining.server;
-        // Restore from persistent save and broadcast
-        Item persisted = BeltLanternSave.get(server).get(joining.getUuid());
-        BeltState.setLamp(joining, persisted);
+        // Restore from persistent save (full stack with NBT) and broadcast
+        var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
+        Item persisted = persistedStack != null ? persistedStack.getItem() : null;
+        BeltState.setLamp(joining, persistedStack);
         BeltNetworking.broadcastBeltState(joining, persisted);
         // If on a dedicated server, send its lamp config to the joining player.
         // In single player, the client's config is trusted as the source of truth.
@@ -60,17 +61,18 @@ public final class BLNeoForgeServerEvents {
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayerEntity leaving)) return;
-        Item lamp = BeltState.getLamp(leaving);
-        BeltLanternSave.get(leaving.server).set(leaving.getUuid(), lamp);
+        // Persist full stack with NBT on disconnect
+        BeltLanternSave.get(leaving.server).set(leaving.getUuid(), BeltState.getLampStack(leaving));
     }
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        if (!(event.getEntity() instanceof ServerPlayerEntity)) return;
+        if (!(event.getOriginal() instanceof ServerPlayerEntity oldPlayer)) return;
         if (!event.isWasDeath()) return;
-        ServerPlayerEntity oldPlayer = (ServerPlayerEntity) event.getOriginal();
+
+        ServerPlayerEntity newPlayer = (ServerPlayerEntity) event.getEntity();
         boolean keep = oldPlayer.getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
-        BeltLanternServer.handleDeath(oldPlayer, keep);
+        BeltLanternServer.handleDeath(oldPlayer, newPlayer, keep);
     }
 
     @SubscribeEvent

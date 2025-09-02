@@ -53,16 +53,16 @@ public final class BLLanguage {
 
         // AutoConfig Options
         add.accept("text.autoconfig.beltborne_lanterns.option.debug", "Enable Debug");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Offset X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Offset Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Offset Z (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Pivot X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Pivot Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Pivot Z (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Offset X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Offset Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Offset Z");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Pivot X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Pivot Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Pivot Z");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotXDeg", "Rotation X (deg)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotYDeg", "Rotation Y (deg)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotation Z (deg)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Scale (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Scale");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Extra Lamps");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Lamp Entry");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "Item ID");
@@ -86,16 +86,16 @@ public final class BLLanguage {
 
         // AutoConfig Options
         add.accept("text.autoconfig.beltborne_lanterns.option.debug", "Включить отладку");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Смещение X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Смещение Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Смещение Z (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Пивот X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Пивот Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Пивот Z (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Смещение X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Смещение Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Смещение Z");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Пивот X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Пивот Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Пивот Z");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotXDeg", "Вращение X (град)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotYDeg", "Вращение Y (град)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Вращение Z (град)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Масштаб (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Масштаб");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Дополнительные лампы");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Запись о лампе");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID Предмета");
@@ -119,16 +119,16 @@ public final class BLLanguage {
 
         // AutoConfig Options
         add.accept("text.autoconfig.beltborne_lanterns.option.debug", "Habilitar Depuración");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Desplazamiento X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Desplazamiento Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Desplazamiento Z (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Pivote X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Pivote Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Pivote Z (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Desplazamiento X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Desplazamiento Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Desplazamiento Z");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Pivote X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Pivote Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Pivote Z");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotXDeg", "Rotación X (grados)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotYDeg", "Rotación Y (grados)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotación Z (grados)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Escala (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Escala");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Lámparas Adicionales");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Entrada de Lámpara");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID del Objeto");
@@ -152,16 +152,16 @@ public final class BLLanguage {
 
         // AutoConfig Options
         add.accept("text.autoconfig.beltborne_lanterns.option.debug", "Activer le Débogage");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Décalage X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Décalage Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Décalage Z (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Pivot X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Pivot Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Pivot Z (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Décalage X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Décalage Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Décalage Z");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Pivot X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Pivot Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Pivot Z");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotXDeg", "Rotation X (deg)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotYDeg", "Rotation Y (deg)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotation Z (deg)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Échelle (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Échelle");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Lampes Supplémentaires");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Entrée de Lampe");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID de l'objet");
@@ -185,16 +185,16 @@ public final class BLLanguage {
 
         // AutoConfig Options
         add.accept("text.autoconfig.beltborne_lanterns.option.debug", "Debug aktivieren");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Versatz X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Versatz Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Versatz Z (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Drehpunkt X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Drehpunkt Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Drehpunkt Z (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Versatz X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Versatz Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Versatz Z");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Drehpunkt X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Drehpunkt Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Drehpunkt Z");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotXDeg", "Rotation X (Grad)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotYDeg", "Rotation Y (Grad)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Rotation Z (Grad)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Skalierung (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Skalierung");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Zusätzliche Lampen");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Lampeneintrag");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "Gegenstand-ID");
@@ -218,16 +218,16 @@ public final class BLLanguage {
 
         // AutoConfig Options
         add.accept("text.autoconfig.beltborne_lanterns.option.debug", "启用调试");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "偏移 X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "偏移 Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "偏移 Z (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "轴心 X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "轴心 Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "轴心 Z (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "偏移 X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "偏移 Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "偏移 Z");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "轴心 X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "轴心 Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "轴心 Z");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotXDeg", "旋转 X (度)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotYDeg", "旋转 Y (度)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "旋转 Z (度)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "缩放 (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "缩放");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "额外灯笼");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "灯笼条目");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "物品 ID");
@@ -251,16 +251,16 @@ public final class BLLanguage {
 
         // AutoConfig Options
         add.accept("text.autoconfig.beltborne_lanterns.option.debug", "Увімкнути відлагодження");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Зсув X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Зсув Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Зсув Z (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Обертання X (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Обертання Y (%)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Обертання Z (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetX100", "Зсув X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetY100", "Зсув Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.offsetZ100", "Зсув Z");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotX100", "Півот X");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotY100", "Півот Y");
+        add.accept("text.autoconfig.beltborne_lanterns.option.pivotZ100", "Півот Z");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotXDeg", "Обертання X (град)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotYDeg", "Обертання Y (град)");
         add.accept("text.autoconfig.beltborne_lanterns.option.rotZDeg", "Обертання Z (град)");
-        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Масштаб (%)");
+        add.accept("text.autoconfig.beltborne_lanterns.option.scale100", "Масштаб");
         add.accept("text.autoconfig.beltborne_lanterns.option.extraLampLight", "Додаткові лампи");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry", "Запис про лампу");
         add.accept("text.autoconfig.beltborne_lanterns.option.ExtraLampEntry.id", "ID Предмета");

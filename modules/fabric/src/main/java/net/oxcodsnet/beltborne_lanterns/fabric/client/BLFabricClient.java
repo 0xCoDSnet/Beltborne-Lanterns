@@ -95,7 +95,14 @@ public final class BLFabricClient implements ClientModInitializer {
 
         // Optionally register dynamic lights for the belt lantern when LambDynamicLights is present
         boolean hasLamb = FabricLoader.getInstance().isModLoaded("lambdynlights");
-        if (hasLamb) LambDynLightsCompat.init();
+        if (hasLamb) {
+            // Defer init to client ticks to ensure LambDynLights finished its client init.
+            ClientTickEvents.END_CLIENT_TICK.register(client -> {
+                if (!LambDynLightsCompat.isInitialized()) {
+                    LambDynLightsCompat.init();
+                }
+            });
+        }
 
         // Keybind to open config (default: L)
         openConfigKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
