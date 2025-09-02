@@ -97,6 +97,14 @@ public final class BLNeoForgeClient {
         event.register(toggleDebugKey);
         event.register(openDebugEditorKey);
         event.register(toggleLanternKey);
+        // Optional: LambDynamicLights integration (prefer typed LDL4 when present)
+        try {
+            if (!net.oxcodsnet.beltborne_lanterns.neoforge.compat.LDL4NeoForge.tryInit()) {
+                // Fallback to LDL3 reflection (safe no-op if not present)
+                net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat.init();
+            }
+        } catch (Throwable ignored) {}
+
         BLMod.LOGGER.info("Client ready [NeoForge].");
     }
 
@@ -109,39 +117,6 @@ public final class BLNeoForgeClient {
                 per.addFeature(new LanternBeltFeatureRenderer((net.minecraft.client.render.entity.feature.FeatureRendererContext<?, ?>) per));
             }
         }
-    }
-
-    @SubscribeEvent
-    public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        // Register S2C payload for syncing which players have a belt lantern
-        var registrar = event.registrar("1"); // network version
-        registrar.playToClient(
-                BeltSyncPayload.ID,
-                BeltSyncPayload.CODEC,
-                (payload, ctx) -> {
-                    UUID uuid = payload.playerUuid();
-                    Item lamp = payload.lampId() != null ? Registries.ITEM.get(payload.lampId()) : null;
-                    ClientBeltPlayers.setLamp(uuid, lamp);
-                }
-        );
-        registrar.playToClient(
-                LampConfigSyncPayload.ID,
-                LampConfigSyncPayload.CODEC,
-                (payload, ctx) -> {
-                    // This receiver handles lamp configs sent from a dedicated server.
-                    ctx.enqueueWork(() -> {
-                        var cliCfg = BLClientConfigAccess.get();
-                        cliCfg.extraLampLight.clear();
-                        payload.lamps().forEach((id, lum) -> cliCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(id.toString(), lum)));
-                        BLClientConfigAccess.save();
-
-                        // Re-initialize the lamp registry with the new data from the server.
-                        LampRegistry.init();
-                    });
-                }
-        );
-        // C2S payloads are registered in BLNeoForgeNetwork
-        // registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> { /* no-op on client */ });
     }
 
     @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT)
@@ -183,6 +158,13 @@ public final class BLNeoForgeClient {
             }
 
             LanternClientLogic.tickLanternPhysics(mc);
+
+            // Retry LDL integration on ticks until successful (handles init order)
+            if (!net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat.isInitialized()) {
+                if (!net.oxcodsnet.beltborne_lanterns.neoforge.compat.LDL4NeoForge.tryInit()) {
+                    net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat.init();
+                }
+            }
         }
     }
 }

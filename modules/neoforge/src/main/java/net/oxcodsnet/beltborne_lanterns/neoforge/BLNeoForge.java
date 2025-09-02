@@ -14,6 +14,5 @@ public final class BLNeoForge {
                 .map(c -> c.getModInfo().getVersion().toString())
                 .orElse("?");
         BLMod.LOGGER.info("Initializing v{} [NeoForge]", version);
-        LambDynLightsCompat.init();
     }
 }
