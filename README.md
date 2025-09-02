@@ -83,8 +83,11 @@ Need it back in your hands? Press **B** again. 💡
     * **NeoForge (with interop):** [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights) + [Connector](https://modrinth.com/mod/connector)
 * **Will this work with the Soul Lantern?** — **YES!**
 * **Will this work with a lantern from another mod?** — **YES!** Add its **item tag** to the compatible list in the config.
-
-
+* **Does this work with the [First-person Model](https://modrinth.com/mod/first-person-model) mod?** — **YES**, and it looks fantastic! *(screenshot under spoiler)*
+  <details><summary>Show screenshot</summary>
+    <img width="854" height="480" alt="2025-09-02_22 58 42" src="https://github.com/user-attachments/assets/cdcde99f-b18e-4d9c-946e-888637c1ad8e" />
+  </details>
+  
 ## 📥 Installation (Minecraft 1.21.x)
 
 **Loaders:** Fabric / Quilt / NeoForge
