@@ -50,6 +50,8 @@ dependencies {
     common(project(path: ':modules:common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionFabric')
 
+    // Optional: LambDynamicLights 4.x API for typed integration (compile-only)
+    modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${rootProject.lambdynamiclights_version}")
 }
 
 repositories {
