@@ -1,5 +1,6 @@
 ## Changelog
 ### 🐞 Bug Fixes
-- Fixed an issue where NBT info could disappear from lanterns.
-- Resolved debug screen glitches and unexpected behavior.
+- Fixed synchronization bug between the client and the server
+- Fixed blur error in debug screen / and other
+- Fixed LDL4 support
 - Fixed an issue where lantern does not drop upon death
