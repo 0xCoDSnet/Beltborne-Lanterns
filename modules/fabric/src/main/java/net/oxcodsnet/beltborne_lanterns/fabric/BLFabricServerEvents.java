@@ -74,10 +74,17 @@ public final class BLFabricServerEvents {
             BeltLanternSave.get(server).set(leaving.getUuid(), BeltState.getLampStack(leaving));
         });
 
+        // Extra safety: persist all players' belt lamps on server stopping
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                BeltLanternSave.get(server).set(player.getUuid(), BeltState.getLampStack(player));
+            }
+        });
+
         // Handle lamp drop/persistence on death and sync after respawn
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             if (alive) return;
-            boolean keep = oldPlayer.getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+            boolean keep = oldPlayer.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
             BeltLanternServer.handleDeath(oldPlayer, newPlayer, keep);
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {

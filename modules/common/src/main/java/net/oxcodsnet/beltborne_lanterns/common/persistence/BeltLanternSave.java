@@ -5,7 +5,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentState;
@@ -135,15 +137,17 @@ public final class BeltLanternSave extends PersistentState {
     public static BeltLanternSave fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         BeltLanternSave save = new BeltLanternSave();
         NbtCompound map = nbt.getCompoundOrEmpty(PLAYERS_KEY);
+        var ops = RegistryOps.of(NbtOps.INSTANCE, registryLookup);
         for (String key : map.getKeys()) {
             try {
                 UUID uuid = UUID.fromString(key);
                 NbtElement el = map.get(key);
                 if (el != null && !(el instanceof NbtString)) { // new format: full encoded stack
-                    ItemStack stack = ItemStack.fromNbt(registryLookup, el).orElse(ItemStack.EMPTY);
-                    if (!stack.isEmpty()) {
-                        save.playersWithLamps.put(uuid, stack);
-                    }
+                    ItemStack.CODEC.parse(ops, el).result().ifPresent(stack -> {
+                        if (!stack.isEmpty()) {
+                            save.playersWithLamps.put(uuid, stack);
+                        }
+                    });
                 } else {
                     map.getString(key).ifPresent(str -> {
                         Identifier id = Identifier.tryParse(str);
@@ -159,9 +163,10 @@ public final class BeltLanternSave extends PersistentState {
 
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         NbtCompound map = new NbtCompound();
+        var ops = RegistryOps.of(NbtOps.INSTANCE, registryLookup);
         for (Map.Entry<UUID, ItemStack> e : playersWithLamps.entrySet()) {
-            NbtElement encoded = e.getValue().toNbt(registryLookup);
-            map.put(e.getKey().toString(), encoded);
+            ItemStack stack = e.getValue();
+            ItemStack.CODEC.encodeStart(ops, stack).result().ifPresent(el -> map.put(e.getKey().toString(), el));
         }
         nbt.put(PLAYERS_KEY, map);
         return nbt;

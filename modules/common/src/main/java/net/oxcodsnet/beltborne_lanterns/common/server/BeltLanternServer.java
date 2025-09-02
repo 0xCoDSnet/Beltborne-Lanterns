@@ -37,7 +37,7 @@ public final class BeltLanternServer {
             // Store the exact stack (count=1) to preserve NBT/enchantments/etc.
             BeltState.setLamp(player, equipped);
             // Persist full stack including NBT for cross-restart restore
-            BeltLanternSave.get(player.server).set(player.getUuid(), equipped);
+            BeltLanternSave.get(player.getServer()).set(player.getUuid(), equipped);
             return item;
         } else {
             if (!creative) {
@@ -52,7 +52,7 @@ public final class BeltLanternServer {
             }
             // Clear state and persistence
             BeltState.setLamp(player, (ItemStack) null);
-            BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
+            BeltLanternSave.get(player.getServer()).set(player.getUuid(), (ItemStack) null);
             return null;
         }
     }
@@ -75,13 +75,13 @@ public final class BeltLanternServer {
         // Drop the exact stored stack with NBT
         ItemStack stored = BeltState.getLampStack(player);
         if (stored != null && !stored.isEmpty()) {
-            player.dropStack(player.getServerWorld(), stored);
+            player.dropItem(stored, false);
         } else {
             ItemStack stack = new ItemStack(lamp);
-            player.dropStack(player.getServerWorld(), stack);
+            player.dropItem(stack, false);
         }
         BeltState.setLamp(player, (ItemStack) null);
-        BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
+        BeltLanternSave.get(player.getServer()).set(player.getUuid(), (ItemStack) null);
         return null;
     }
 
@@ -101,18 +101,18 @@ public final class BeltLanternServer {
             ItemStack stored = BeltState.getLampStack(oldPlayer);
             // Transfer the exact stack (including NBT) to the new player
             BeltState.setLamp(newPlayer, stored);
-            BeltLanternSave.get(newPlayer.server).set(newPlayer.getUuid(), stored);
+            BeltLanternSave.get(newPlayer.getServer()).set(newPlayer.getUuid(), stored);
             return;
         }
         // Drop from old player's position and clear state
         ItemStack stored = BeltState.getLampStack(oldPlayer);
         if (stored != null && !stored.isEmpty()) {
-            oldPlayer.dropStack(oldPlayer.getServerWorld(), stored);
+            oldPlayer.dropItem(stored, false);
         } else {
-            oldPlayer.dropStack(oldPlayer.getServerWorld(), new ItemStack(lamp));
+            oldPlayer.dropItem(new ItemStack(lamp), false);
         }
         BeltState.setLamp(oldPlayer, (ItemStack) null);
-        BeltLanternSave.get(oldPlayer.server).set(oldPlayer.getUuid(), (ItemStack) null);
+        BeltLanternSave.get(oldPlayer.getServer()).set(oldPlayer.getUuid(), (ItemStack) null);
         // Ensure new player does not carry over state
         BeltState.setLamp(newPlayer, (ItemStack) null);
     }

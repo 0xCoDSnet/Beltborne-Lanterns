@@ -10,6 +10,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
@@ -36,7 +37,7 @@ public final class BLNeoForgeServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayerEntity joining)) return;
-        MinecraftServer server = joining.server;
+        MinecraftServer server = joining.getServer();
         // Restore from persistent save (full stack with NBT) and broadcast
         var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
         Item persisted = persistedStack != null ? persistedStack.getItem() : null;
@@ -62,7 +63,7 @@ public final class BLNeoForgeServerEvents {
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayerEntity leaving)) return;
         // Persist full stack with NBT on disconnect
-        BeltLanternSave.get(leaving.server).set(leaving.getUuid(), BeltState.getLampStack(leaving));
+        BeltLanternSave.get(leaving.getServer()).set(leaving.getUuid(), BeltState.getLampStack(leaving));
     }
 
     @SubscribeEvent
@@ -71,7 +72,7 @@ public final class BLNeoForgeServerEvents {
         if (!event.isWasDeath()) return;
 
         ServerPlayerEntity newPlayer = (ServerPlayerEntity) event.getEntity();
-        boolean keep = oldPlayer.getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+        boolean keep = oldPlayer.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
         BeltLanternServer.handleDeath(oldPlayer, newPlayer, keep);
     }
 
@@ -85,5 +86,13 @@ public final class BLNeoForgeServerEvents {
     @SubscribeEvent
     public static void onTagsUpdated(TagsUpdatedEvent event) {
         LampRegistry.init();
+    }
+
+    @SubscribeEvent
+    public static void onServerStopping(ServerStoppingEvent event) {
+        var server = event.getServer();
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            BeltLanternSave.get(server).set(player.getUuid(), BeltState.getLampStack(player));
+        }
     }
 }
