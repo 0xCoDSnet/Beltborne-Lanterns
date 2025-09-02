@@ -97,6 +97,14 @@ public final class BLNeoForgeClient {
         event.register(toggleDebugKey);
         event.register(openDebugEditorKey);
         event.register(toggleLanternKey);
+        // Optional: LambDynamicLights integration (prefer typed LDL4 when present)
+        try {
+            if (!net.oxcodsnet.beltborne_lanterns.neoforge.compat.LDL4NeoForge.tryInit()) {
+                // Fallback to LDL3 reflection (safe no-op if not present)
+                net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat.init();
+            }
+        } catch (Throwable ignored) {}
+
         BLMod.LOGGER.info("Client ready [NeoForge].");
     }
 
@@ -181,8 +189,15 @@ public final class BLNeoForgeClient {
             if (toggleLanternKey != null && toggleLanternKey.wasPressed()) {
                 PacketDistributor.sendToServer(new ToggleLanternPayload());
             }
-
+            
             LanternClientLogic.tickLanternPhysics(mc);
+
+            // Retry LDL integration on ticks until successful (handles init order)
+            if (!net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat.isInitialized()) {
+                if (!net.oxcodsnet.beltborne_lanterns.neoforge.compat.LDL4NeoForge.tryInit()) {
+                    net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat.init();
+                }
+            }
         }
     }
 }

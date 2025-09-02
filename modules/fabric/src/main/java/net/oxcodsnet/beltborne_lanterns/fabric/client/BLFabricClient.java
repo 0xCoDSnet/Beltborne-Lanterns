@@ -96,12 +96,18 @@ public final class BLFabricClient implements ClientModInitializer {
         // Optionally register dynamic lights for the belt lantern when LambDynamicLights is present
         boolean hasLamb = FabricLoader.getInstance().isModLoaded("lambdynlights");
         if (hasLamb) {
-            // Try immediately so we catch LDL's early registration window (4.x event API).
-            LambDynLightsCompat.init();
-            // Also retry on ticks until it succeeds (handles init order edge cases).
+            // Prefer typed LDL4 integration when available on classpath (compileOnly).
+            net.oxcodsnet.beltborne_lanterns.fabric.compat.LDL4Fabric.tryInit();
+            // Fallback to LDL3 reflection if not initialized yet.
+            if (!LambDynLightsCompat.isInitialized()) {
+                LambDynLightsCompat.init();
+            }
+            // Retry on ticks until one of the integrations succeeds.
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 if (!LambDynLightsCompat.isInitialized()) {
-                    LambDynLightsCompat.init();
+                    if (!net.oxcodsnet.beltborne_lanterns.fabric.compat.LDL4Fabric.tryInit()) {
+                        LambDynLightsCompat.init();
+                    }
                 }
             });
         }
