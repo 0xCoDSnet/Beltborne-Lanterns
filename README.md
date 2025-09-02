@@ -15,10 +15,10 @@
     <a href="https://modrinth.com/project/beltborne-lanterns/versions?l=fabric">
         <img src="https://cdn.modrinth.com/data/cached_images/d8a8d9852fb6e55292d6f5ecc1842fd7bc8c3c9e.webp" alt="Available on Fabric">
     </a>
-    <a href="https://modrinth.com/project/beltborne-lanterns?l=quilt">
+    <a href="https://modrinth.com/project/beltborne-lanterns/versions?l=quilt">
         <img src="https://cdn.modrinth.com/data/cached_images/77e67c2eae40b638430d5959e9a0d0ef60f76f41.webp" alt="Available on Quilt">
     </a>
-   <a href="https://modrinth.com/project/beltborne-lanterns?l=neoforge">
+   <a href="https://modrinth.com/project/beltborne-lanterns/versions?l=neoforge">
     <img src="https://cdn.modrinth.com/data/cached_images/ecbd0303728027761730760800f9354e14f38d31.webp" alt="Available on NeoForge">
   </a>
 </p>
