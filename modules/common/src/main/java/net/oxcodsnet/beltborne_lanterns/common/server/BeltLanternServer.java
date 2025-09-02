@@ -1,5 +1,6 @@
 package net.oxcodsnet.beltborne_lanterns.common.server;
 
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,18 +30,30 @@ public final class BeltLanternServer {
         if (current == null) {
             Item item = stackInHand.getItem();
             if (!LampRegistry.isLamp(item)) return null;
+            // Copy the exact stack (count=1) BEFORE decrementing, to preserve NBT when count==1
+            ItemStack equipped = stackInHand.copyWithCount(1);
             if (!creative) {
                 stackInHand.decrement(1);
             }
-            BeltState.setLamp(player, item);
-            BeltLanternSave.get(player.server).set(player.getUuid(), item);
+            // Store the exact stack (count=1) to preserve NBT/enchantments/etc.
+            BeltState.setLamp(player, equipped);
+            // Persist full stack including NBT for cross-restart restore
+            BeltLanternSave.get(player.server).set(player.getUuid(), equipped);
             return item;
         } else {
             if (!creative) {
-                player.giveItemStack(new ItemStack(current));
+                // Return the exact stored stack with NBT back to the player
+                ItemStack stored = BeltState.getLampStack(player);
+                if (stored != null && !stored.isEmpty()) {
+                    player.giveItemStack(stored);
+                } else {
+                    // Fallback: at least return the plain item
+                    player.giveItemStack(new ItemStack(current));
+                }
             }
-            BeltState.setLamp(player, null);
-            BeltLanternSave.get(player.server).set(player.getUuid(), null);
+            // Clear state and persistence
+            BeltState.setLamp(player, (ItemStack) null);
+            BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
             return null;
         }
     }
@@ -60,9 +73,22 @@ public final class BeltLanternServer {
         if (keepInventory) {
             return lamp;
         }
-        player.giveOrDropStack(new ItemStack(lamp));
-        BeltState.setLamp(player, null);
-        BeltLanternSave.get(player.server).set(player.getUuid(), null);
+        // Drop the exact stored stack with NBT
+        ItemStack stored = BeltState.getLampStack(player);
+        if (stored != null && !stored.isEmpty()) {
+            player.dropStack(stored);
+        } else {
+            ItemStack stack = new ItemStack(lamp);
+            ItemEntity itemEntity = new ItemEntity(oldPlayer.getServerWorld(), oldPlayer.getX(), oldPlayer.getY(), oldPlayer.getZ(), stack);
+            itemEntity.setPickupDelay(40);
+            oldPlayer.getServerWorld().spawnEntity(itemEntity);
+
+            BeltState.setLamp(oldPlayer, null);
+            BeltLanternSave.get(oldPlayer.server).set(oldPlayer.getUuid(), null);
+        }
+        BeltState.setLamp(player, (ItemStack) null);
+        BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
         return null;
     }
 }
+

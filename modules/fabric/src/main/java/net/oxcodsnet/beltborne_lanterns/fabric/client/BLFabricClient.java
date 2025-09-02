@@ -81,7 +81,7 @@ public final class BLFabricClient implements ClientModInitializer {
         @SuppressWarnings("unchecked")
         LivingEntityFeatureRendererRegistrationCallback playerFeatureRendererCallback = (entityType, renderer, helper, context) -> {
             if (entityType == EntityType.PLAYER) {
-                helper.register(new LanternBeltFeatureRenderer((net.minecraft.client.render.entity.feature.FeatureRendererContext<?, ?>) renderer));
+                helper.register(new LanternBeltFeatureRenderer(renderer));
             }
         };
         LivingEntityFeatureRendererRegistrationCallback.EVENT.register(playerFeatureRendererCallback);
