@@ -2,13 +2,15 @@
   "required": false,
   "minVersion": "0.8",
   "package": "net.oxcodsnet.beltborne_lanterns.mixin",
+  "refmap": "beltborne_lanterns.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
   "client": [
+    "LivingEntityRendererMixin",
+    "PlayerEntityRenderStateAccessorMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   }
 }
-

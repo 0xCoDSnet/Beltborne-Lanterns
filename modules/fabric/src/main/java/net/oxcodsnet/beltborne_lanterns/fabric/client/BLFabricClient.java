@@ -51,7 +51,19 @@ public final class BLFabricClient implements ClientModInitializer {
 
         // Rebuild registry after client joins a server (tags/registries are synced at this point)
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            client.execute(LampRegistry::init);
+            client.execute(()->{
+                ClientBeltPlayers.clear();
+                LanternSwingManager.clearAll();
+                LampRegistry.init();
+            });
+        });
+
+        // Clear caches on disconnect as well
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            MinecraftClient.getInstance().execute(() -> {
+                ClientBeltPlayers.clear();
+                LanternSwingManager.clearAll();
+            });
         });
 
         // Register network receiver: updates local client set
