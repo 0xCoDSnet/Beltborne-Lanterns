@@ -39,14 +39,22 @@ public class LanternBeltFeatureRenderer extends FeatureRenderer<PlayerEntityRend
         // MC 1.21+ feature renderers receive a render-state, not the entity.
         // Determine the rendered player's UUID from the state when possible.
         UUID subject = null;
-        // Try to obtain UUID from the render state via reflection to be resilient to mapping changes
+        // First, try accessor injected into render state
+        if (state instanceof RenderStatePlayerUuidAccess acc) {
+            subject = acc.bl$getPlayerUuid();
+        }
+        // Next, try the mixin-provided map that binds states to entities at updateRenderState time
+        if (subject == null) {
+            subject = RenderStateUUIDMap.get(state);
+        }
+        // If unavailable, try to obtain UUID from the render state via reflection to be resilient to mapping changes
         try {
-            var cls = PlayerEntityRenderState.class;
+            Class<?> cls = state.getClass();
             // Candidate fields: prefer direct UUID; otherwise GameProfile
             String[] uuidFieldCandidates = {"uuid", "profileId", "gameProfileId", "playerUuid"};
             for (String name : uuidFieldCandidates) {
                 try {
-                    var f = cls.getDeclaredField(name);
+                    var f = ReflectUtilBL.findFieldRecursive(cls, name);
                     f.setAccessible(true);
                     Object v = f.get(state);
                     if (v instanceof UUID u) { subject = u; break; }
@@ -56,7 +64,7 @@ public class LanternBeltFeatureRenderer extends FeatureRenderer<PlayerEntityRend
                 String[] profileFieldCandidates = {"gameProfile", "profile"};
                 for (String name : profileFieldCandidates) {
                     try {
-                        var f = cls.getDeclaredField(name);
+                        var f = ReflectUtilBL.findFieldRecursive(cls, name);
                         f.setAccessible(true);
                         Object v = f.get(state);
                         // Avoid compile-time dep: use reflection to call getId
@@ -129,5 +137,21 @@ public class LanternBeltFeatureRenderer extends FeatureRenderer<PlayerEntityRend
         brm.renderBlockAsEntity(blockState, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
 
         matrices.pop();
+    }
+}
+
+// Reflection helpers (package-private)
+final class ReflectUtilBL {
+    private ReflectUtilBL() {}
+    static java.lang.reflect.Field findFieldRecursive(Class<?> cls, String name) throws NoSuchFieldException {
+        Class<?> c = cls;
+        while (c != null) {
+            try {
+                return c.getDeclaredField(name);
+            } catch (NoSuchFieldException e) {
+                c = c.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(name);
     }
 }

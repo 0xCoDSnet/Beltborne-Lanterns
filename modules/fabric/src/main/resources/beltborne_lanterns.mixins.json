@@ -6,9 +6,10 @@
   "mixins": [
   ],
   "client": [
+    "LivingEntityRendererMixin",
+    "PlayerEntityRenderStateAccessorMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   }
 }
-
