@@ -1,6 +1,5 @@
 package net.oxcodsnet.beltborne_lanterns.neoforge.client;
 
-import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -17,9 +16,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.oxcodsnet.beltborne_lanterns.BLMod;
-import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;
@@ -27,19 +23,12 @@ import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientLogic;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
 import net.oxcodsnet.beltborne_lanterns.common.client.ui.LanternDebugScreen;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
-import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
-import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
 import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
-
-import java.util.UUID;
 
 @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class BLNeoForgeClient {
