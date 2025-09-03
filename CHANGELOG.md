@@ -1,3 +1,3 @@
 ## Changelog
 ### 🐞 Bug Fixes
-- Fixed synchronization bug between the client and the server
+- Fixed a bug in multiplayer where lamps were synchronized immediately for all players. 
