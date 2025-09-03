@@ -23,7 +23,6 @@ import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer
 import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientLogic;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternClientScreens;
-import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
@@ -51,7 +50,19 @@ public final class BLFabricClient implements ClientModInitializer {
 
         // Rebuild registry after client joins a server (tags/registries are synced at this point)
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            client.execute(LampRegistry::init);
+            client.execute(() -> {
+                // Reset client-side caches to avoid stale state between worlds
+                ClientBeltPlayers.clear();
+                LanternSwingManager.clearAll();
+                LampRegistry.init();
+            });
+        });
+        // Clear caches on disconnect as well
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            MinecraftClient.getInstance().execute(() -> {
+                ClientBeltPlayers.clear();
+                LanternSwingManager.clearAll();
+            });
         });
 
         // Register network receiver: updates local client set
