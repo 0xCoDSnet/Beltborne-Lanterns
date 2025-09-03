@@ -22,4 +22,3 @@ public final class BLDebugRender {
         // Intentionally left blank on 1.21+ to avoid API churn.
     }
 }
-

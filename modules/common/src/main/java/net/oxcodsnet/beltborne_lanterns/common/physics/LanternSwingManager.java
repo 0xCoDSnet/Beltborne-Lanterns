@@ -164,6 +164,11 @@ public final class LanternSwingManager {
         KIN.remove(id);
     }
 
+    public static void clearAll() {
+        STATES.clear();
+        KIN.clear();
+    }
+
     private static float wrapDegrees(float deg) {
         return MathHelper.wrapDegrees(deg);
     }
@@ -188,4 +193,3 @@ public final class LanternSwingManager {
         boolean baseInit = false;
     }
 }
-
