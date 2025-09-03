@@ -31,5 +31,8 @@ public final class ClientBeltPlayers {
     public static Item getLamp(UUID uuid) {
         return BELT_PLAYERS.get(uuid);
     }
-}
 
+    public static void clear() {
+        BELT_PLAYERS.clear();
+    }
+}
