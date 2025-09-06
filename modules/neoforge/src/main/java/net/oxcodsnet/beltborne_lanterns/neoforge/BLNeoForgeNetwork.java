@@ -11,6 +11,7 @@ import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
+import net.oxcodsnet.beltborne_lanterns.common.compat.CompatibilityLayerRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfig;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLClientConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
@@ -40,6 +41,11 @@ public final class BLNeoForgeNetwork {
         registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) ctx.player();
             ctx.enqueueWork(() -> {
+                // Try to toggle lantern via compatibility layers
+                for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                    if (layer.tryToggleLantern(player)) return;
+                }
+
                 ItemStack stack = player.getMainHandStack();
                 boolean hasLamp = BeltState.hasLamp(player);
                 if (!hasLamp && !LampRegistry.isLamp(stack)) {
@@ -48,6 +54,12 @@ public final class BLNeoForgeNetwork {
                 }
                 Item nowHas = BeltLanternServer.toggleLantern(player, stack);
                 BeltNetworking.broadcastBeltState(player, nowHas);
+                if (nowHas != null) {
+                    // Sync to compatibility layers
+                    for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                        layer.syncToggleOn(player);
+                    }
+                }
             });
         });
 

@@ -30,6 +30,8 @@ import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 
 import net.oxcodsnet.beltborne_lanterns.common.physics.LanternSwingManager;
 
+import java.util.UUID;
+
 @EventBusSubscriber(modid = BLMod.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class BLNeoForgeClient {
     // no per-loader state; use common ClientBeltPlayers
