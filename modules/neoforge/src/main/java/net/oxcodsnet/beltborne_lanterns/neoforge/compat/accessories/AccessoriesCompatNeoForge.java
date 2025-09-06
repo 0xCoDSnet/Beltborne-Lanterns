@@ -8,22 +8,31 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
+import net.oxcodsnet.beltborne_lanterns.common.compat.CompatibilityLayer;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.neoforge.BeltNetworking;
+
+import java.util.Optional;
 
 /**
  * Accessories (WispForest) integration for NeoForge.
  */
-public final class AccessoriesCompatNeoForge {
-    private AccessoriesCompatNeoForge() {}
+public final class AccessoriesCompatNeoForge implements CompatibilityLayer {
     private static final String BELT = "belt";
+    private static final java.util.Set<java.util.UUID> SYNCING = java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
+
+    @Override
+    public String getModId() {
+        return "accessories";
+    }
+
     private static boolean isBeltSlot(SlotReference ref) {
         String name = ref.slotName();
         return BELT.equals(name) || (name != null && name.endsWith(":" + BELT));
     }
-    private static final java.util.Set<java.util.UUID> SYNCING = java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
 
-    public static void init() {
+    @Override
+    public void onInitialize() {
         AccessoryChangeCallback.EVENT.register((prev, now, ref, change) -> {
             if (!(ref.entity() instanceof ServerPlayerEntity player)) return;
             if (!isBeltSlot(ref)) return;
@@ -56,7 +65,8 @@ public final class AccessoriesCompatNeoForge {
         BLMod.LOGGER.info("Accessories integration active [NeoForge]");
     }
 
-    public static boolean tryToggleViaAccessories(ServerPlayerEntity player) {
+    @Override
+    public boolean tryToggleLantern(ServerPlayerEntity player) {
         SlotReference ref = SlotReference.of(player, BELT, 0);
         if (!ref.isValid()) return false;
         ItemStack stack = ref.getStack();
@@ -71,15 +81,15 @@ public final class AccessoriesCompatNeoForge {
         return false;
     }
 
-    /** Returns the current stack in the Accessories belt slot, or ItemStack.EMPTY if absent. */
-    public static ItemStack getBeltStack(ServerPlayerEntity player) {
+    @Override
+    public Optional<ItemStack> getBeltStack(ServerPlayerEntity player) {
         SlotReference ref = SlotReference.of(player, BELT, 0);
-        if (!ref.isValid()) return ItemStack.EMPTY;
-        return ref.getStack();
+        if (!ref.isValid()) return Optional.empty();
+        return Optional.of(ref.getStack());
     }
 
-    /** If toggled ON via B, mirror to Accessories belt slot (if empty). */
-    public static void syncToggleOnToAccessories(ServerPlayerEntity player) {
+    @Override
+    public void syncToggleOn(ServerPlayerEntity player) {
         SlotReference ref = SlotReference.of(player, BELT, 0);
         if (!ref.isValid()) return;
         if (!ref.getStack().isEmpty()) return;
@@ -92,6 +102,4 @@ public final class AccessoriesCompatNeoForge {
             SYNCING.remove(player.getUuid());
         }
     }
-
-    // No registration needed when acceptance is driven by tags; we only listen for changes
 }

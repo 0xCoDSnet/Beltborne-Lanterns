@@ -11,6 +11,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
+import net.oxcodsnet.beltborne_lanterns.common.compat.CompatibilityLayerRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
@@ -30,18 +31,10 @@ public final class BLFabricServerEvents {
         ServerPlayNetworking.registerGlobalReceiver(ToggleLanternPayload.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
             context.server().execute(() -> {
-                // If Accessories is present and the belt slot holds a lamp, unequip from there
-                // to provide a unified toggle interface.
-                // TODO: Accessories compat moved to a separate module
-                // boolean handledByAccessories = false;
-                // try {
-                //     // Call only if the compat class is present in the classpath; it's safe since we only load it when Accessories is installed.
-                //     handledByAccessories = net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.tryToggleViaAccessories(player);
-                // } catch (Throwable ignored) {
-                //     // Accessories not installed or API unavailable; fall through to default logic
-                // }
-
-                // if (handledByAccessories) return;
+                // Try to toggle lantern via compatibility layers
+                for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                    if (layer.tryToggleLantern(player)) return;
+                }
 
                 ItemStack stack = player.getMainHandStack();
                 boolean hasLamp = BeltState.hasLamp(player);
@@ -52,12 +45,10 @@ public final class BLFabricServerEvents {
                 Item nowHas = BeltLanternServer.toggleLantern(player, stack);
                 BeltNetworking.broadcastBeltState(player, nowHas);
                 if (nowHas != null) {
-                    // TODO: Accessories compat moved to a separate module
-                    // try {
-                    //     net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.syncToggleOnToAccessories(player);
-                    // } catch (Throwable ignored) {
-                    //     // Accessories not installed — ignore
-                    // }
+                    // Sync to compatibility layers
+                    for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                        layer.syncToggleOn(player);
+                    }
                 }
             });
         });
@@ -68,16 +59,14 @@ public final class BLFabricServerEvents {
             // Restore from persistent save (full stack with NBT)
             var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
 
-            // If Accessories belt slot already has a lamp, prefer that as source of truth
-            // TODO: Accessories compat moved to a separate module
-            // try {
-            //     var slotStack = net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.getBeltStack(joining);
-            //     if (LampRegistry.isLamp(slotStack)) {
-            //         persistedStack = slotStack;
-            //     }
-            // } catch (Throwable ignored) {
-            //     // Accessories not installed — ignore
-            // }
+            // If a compatibility layer has a belt stack, prefer that as source of truth
+            for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                var slotStack = layer.getBeltStack(joining);
+                if (slotStack.isPresent() && LampRegistry.isLamp(slotStack.get())) {
+                    persistedStack = slotStack.get();
+                    break;
+                }
+            }
 
             Item persisted = persistedStack != null ? persistedStack.getItem() : null;
             BeltState.setLamp(joining, persistedStack);

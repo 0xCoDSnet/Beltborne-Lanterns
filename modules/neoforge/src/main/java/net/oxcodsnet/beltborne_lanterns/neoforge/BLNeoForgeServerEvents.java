@@ -14,6 +14,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
+import net.oxcodsnet.beltborne_lanterns.common.compat.CompatibilityLayerRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
@@ -50,16 +51,14 @@ public final class BLNeoForgeServerEvents {
         // Restore from persistent save (full stack with NBT) and broadcast
         var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
 
-        // If Accessories belt slot already has a lamp, prefer that as source of truth
-        // TODO: Accessories compat moved to a separate module
-        // try {
-        //     var slotStack = net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.getBeltStack(joining);
-        //     if (LampRegistry.isLamp(slotStack)) {
-        //         persistedStack = slotStack;
-        //     }
-        // } catch (Throwable ignored) {
-        //     // Accessories not installed — ignore
-        // }
+        // If a compatibility layer has a belt stack, prefer that as source of truth
+        for (var layer : CompatibilityLayerRegistry.getLayers()) {
+            var slotStack = layer.getBeltStack(joining);
+            if (slotStack.isPresent() && LampRegistry.isLamp(slotStack.get())) {
+                persistedStack = slotStack.get();
+                break;
+            }
+        }
 
         Item persisted = persistedStack != null ? persistedStack.getItem() : null;
         BeltState.setLamp(joining, persistedStack);
