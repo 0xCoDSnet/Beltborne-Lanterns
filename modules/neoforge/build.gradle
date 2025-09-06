@@ -42,16 +42,16 @@ dependencies {
     common(project(path: ':modules:common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionNeoForge')
 
-    // Accessories (WispForest) API — compile against official API, optional at runtime
+    // Accessories (WispForest) API — optional; compileOnly so dev run doesn't pull 1.21.1 deps
     modCompileOnly "io.wispforest:accessories-neoforge:${rootProject.accessories_version}"
-    modRuntimeOnly  "io.wispforest:accessories-neoforge:${rootProject.accessories_version}"
+    //modRuntimeOnly  "io.wispforest:accessories-neoforge:${rootProject.accessories_version}"
 
     // Provide Fabric Event interface at compile-time only (Accessories API types reference it)
     compileOnly "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    // OWO lib (Accessories expects it), optional at runtime
-    modCompileOnly "io.wispforest:owo-lib:${rootProject.owo_version}"
-    modRuntimeOnly  "io.wispforest:owo-lib:${rootProject.owo_version}"
+    // OWO lib (Accessories expects it) — compileOnly, do not include at runtime in dev
+    modCompileOnly "io.wispforest:owo-lib-neoforge:${rootProject.owo_neoforge_version}"
+    //modRuntimeOnly  "io.wispforest:owo-lib:${rootProject.owo_version}"
 }
 
 processResources {

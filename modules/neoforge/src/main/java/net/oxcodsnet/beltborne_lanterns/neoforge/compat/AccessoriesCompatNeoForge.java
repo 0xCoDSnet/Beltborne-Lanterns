@@ -1,4 +1,4 @@
-package net.oxcodsnet.beltborne_lanterns.fabric.compat;
+package net.oxcodsnet.beltborne_lanterns.neoforge.compat;
 
 import io.wispforest.accessories.api.AccessoriesAPI;
 import io.wispforest.accessories.api.Accessory;
@@ -11,17 +11,13 @@ import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
-import net.oxcodsnet.beltborne_lanterns.fabric.BeltNetworking;
+import net.oxcodsnet.beltborne_lanterns.neoforge.BeltNetworking;
 
 /**
- * Accessories (WispForest) integration for Fabric.
- *
- * - Mirrors the belt slot state into BeltState for rendering/lighting.
- * - Keeps inventory semantics consistent with Accessories actions.
- * - Allows using the same toggle key (B) to unequip from the belt slot.
+ * Accessories (WispForest) integration for NeoForge.
  */
-public final class AccessoriesCompatFabric {
-    private AccessoriesCompatFabric() {}
+public final class AccessoriesCompatNeoForge {
+    private AccessoriesCompatNeoForge() {}
     private static final String BELT = "belt";
     private static boolean isBeltSlot(SlotReference ref) {
         String name = ref.slotName();
@@ -41,10 +37,8 @@ public final class AccessoriesCompatFabric {
             @Override
             public int maxStackSize(ItemStack stack) { return 1; }
         };
-        // Initial register (may be empty if lamps not initialized yet)
         registerAllCurrentLamps(beltLamp);
 
-        // Register for any changes in the belt slot and mirror them to BeltState
         AccessoryChangeCallback.EVENT.register((prev, now, ref, change) -> {
             if (!(ref.entity() instanceof ServerPlayerEntity player)) return;
             if (!isBeltSlot(ref)) return;
@@ -53,9 +47,6 @@ public final class AccessoriesCompatFabric {
             boolean newIsLamp = LampRegistry.isLamp(now);
 
             if (!prevIsLamp && newIsLamp) {
-                // A lamp was equipped into the Accessories belt slot
-                // If we previously equipped via B (not via slot), return that lamp to the player's inventory,
-                // but only if the newly equipped stack is different from the one we already track in BeltState.
                 if (BeltState.hasLamp(player) && !SYNCING.contains(player.getUuid())) {
                     ItemStack current = BeltState.getLampStack(player);
                     boolean same = current != null && ItemStack.areEqual(current, now);
@@ -63,19 +54,14 @@ public final class AccessoriesCompatFabric {
                         player.giveItemStack(current);
                     }
                 }
-                // Mirror the new slot lamp into BeltState and persist
                 BeltState.setLamp(player, now);
                 BeltLanternSave.get(player.server).set(player.getUuid(), now);
                 BeltNetworking.broadcastBeltState(player, now.getItem());
-
             } else if (prevIsLamp && !newIsLamp) {
-                // A lamp was unequipped from the Accessories belt slot
                 BeltState.setLamp(player, (Item) null);
                 BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
                 BeltNetworking.broadcastBeltState(player, null);
-
             } else if (prevIsLamp && newIsLamp) {
-                // Lamp changed/replaced in the slot, update the mirrored state
                 BeltState.setLamp(player, now);
                 BeltLanternSave.get(player.server).set(player.getUuid(), now);
                 BeltNetworking.broadcastBeltState(player, now.getItem());
@@ -84,21 +70,16 @@ public final class AccessoriesCompatFabric {
 
         // Expose refresh hook to common code
         net.oxcodsnet.beltborne_lanterns.common.compat.AccessoriesCompatBridge.setRefreshCallback(
-                net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric::refreshRegisteredAccessories
+                net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge::refreshRegisteredAccessories
         );
-        BLMod.LOGGER.info("Accessories integration active [Fabric]");
+        BLMod.LOGGER.info("Accessories integration active [NeoForge]");
     }
 
-    /**
-     * If the Accessories belt slot currently holds a supported lamp, unequips it and returns true.
-     * Otherwise returns false.
-     */
     public static boolean tryToggleViaAccessories(ServerPlayerEntity player) {
         SlotReference ref = SlotReference.of(player, BELT, 0);
         if (!ref.isValid()) return false;
         ItemStack stack = ref.getStack();
         if (LampRegistry.isLamp(stack)) {
-            // Programmatic unequip: explicitly return the item in survival
             ItemStack toReturn = stack.copy();
             ref.setStack(ItemStack.EMPTY);
             if (!player.isCreative() && !toReturn.isEmpty()) {

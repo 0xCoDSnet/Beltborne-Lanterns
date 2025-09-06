@@ -62,7 +62,9 @@ public final class BLClientConfigAccess {
                 lampCfg.extraLampLight.clear();
                 cfg.extraLampLight.forEach(entry -> lampCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(entry.id, entry.luminance)));
                 BLLampConfigAccess.save();
+                // Rebuild LampRegistry from updated config and notify platform integrations
                 LampRegistry.init();
+                net.oxcodsnet.beltborne_lanterns.common.compat.AccessoriesCompatBridge.refreshRegisteredAccessories();
                 return ActionResult.SUCCESS;
             });
         }
