@@ -33,6 +33,8 @@ public final class BeltLanternServer {
             ItemStack equipped = stackInHand.copyWithCount(1);
             if (!creative) {
                 stackInHand.decrement(1);
+                // Ensure inventory updates are propagated in survival
+                player.getInventory().markDirty();
             }
             // Store the exact stack (count=1) to preserve NBT/enchantments/etc.
             BeltState.setLamp(player, equipped);
