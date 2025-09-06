@@ -30,6 +30,18 @@ public final class BLFabricServerEvents {
         ServerPlayNetworking.registerGlobalReceiver(ToggleLanternPayload.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
             context.server().execute(() -> {
+                // If Accessories is present and the belt slot holds a lamp, unequip from there
+                // to provide a unified toggle interface.
+                boolean handledByAccessories = false;
+                try {
+                    // Call only if the compat class is present in the classpath; it's safe since we only load it when Accessories is installed.
+                    handledByAccessories = net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.tryToggleViaAccessories(player);
+                } catch (Throwable ignored) {
+                    // Accessories not installed or API unavailable; fall through to default logic
+                }
+
+                if (handledByAccessories) return;
+
                 ItemStack stack = player.getMainHandStack();
                 boolean hasLamp = BeltState.hasLamp(player);
                 if (!hasLamp && !LampRegistry.isLamp(stack)) {
@@ -38,6 +50,13 @@ public final class BLFabricServerEvents {
                 }
                 Item nowHas = BeltLanternServer.toggleLantern(player, stack);
                 BeltNetworking.broadcastBeltState(player, nowHas);
+                if (nowHas != null) {
+                    try {
+                        net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.syncToggleOnToAccessories(player);
+                    } catch (Throwable ignored) {
+                        // Accessories not installed — ignore
+                    }
+                }
             });
         });
 
@@ -46,6 +65,17 @@ public final class BLFabricServerEvents {
             ServerPlayerEntity joining = handler.getPlayer();
             // Restore from persistent save (full stack with NBT)
             var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
+
+            // If Accessories belt slot already has a lamp, prefer that as source of truth
+            try {
+                var slotStack = net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.getBeltStack(joining);
+                if (LampRegistry.isLamp(slotStack)) {
+                    persistedStack = slotStack;
+                }
+            } catch (Throwable ignored) {
+                // Accessories not installed — ignore
+            }
+
             Item persisted = persistedStack != null ? persistedStack.getItem() : null;
             BeltState.setLamp(joining, persistedStack);
             // Tell everyone (and self) about joining player's state (by item type)
@@ -87,7 +117,13 @@ public final class BLFabricServerEvents {
         });
 
         // Lifecycle events
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> LampRegistry.init());
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> LampRegistry.init());
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            LampRegistry.init();
+            try { net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
+        });
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
+            LampRegistry.init();
+            try { net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
+        });
     }
 }

@@ -8,6 +8,7 @@ import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
+import net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric;
 
 public final class BLFabric implements ModInitializer {
     @Override
@@ -25,6 +26,12 @@ public final class BLFabric implements ModInitializer {
 
         // Common compatibility loader
         LambDynLightsCompat.init();
+
+        // Accessories (WispForest) integration — only if the mod is present
+        boolean hasAccessories = FabricLoader.getInstance().isModLoaded("accessories");
+        if (hasAccessories) {
+            AccessoriesCompatFabric.init();
+        }
 
         // Register payload types for networking.
         // These are common and need to be registered on both client and server.

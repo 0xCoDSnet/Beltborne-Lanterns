@@ -50,6 +50,14 @@ dependencies {
     common(project(path: ':modules:common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionFabric')
 
+    // Accessories (WispForest) API — compile against official API, optional at runtime
+    modCompileOnly "io.wispforest:accessories-fabric:${rootProject.accessories_version}"
+    modRuntimeOnly  "io.wispforest:accessories-fabric:${rootProject.accessories_version}"
+
+    // OWO lib (Accessories expects it), optional at runtime
+    modCompileOnly "io.wispforest:owo-lib:${rootProject.owo_version}"
+    modRuntimeOnly  "io.wispforest:owo-lib:${rootProject.owo_version}"
+
 }
 
 repositories {

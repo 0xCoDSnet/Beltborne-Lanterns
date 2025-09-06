@@ -1,0 +1,138 @@
+package net.oxcodsnet.beltborne_lanterns.fabric.compat;
+
+import io.wispforest.accessories.api.AccessoriesAPI;
+import io.wispforest.accessories.api.Accessory;
+import io.wispforest.accessories.api.events.AccessoryChangeCallback;
+import io.wispforest.accessories.api.slot.SlotReference;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.oxcodsnet.beltborne_lanterns.BLMod;
+import net.oxcodsnet.beltborne_lanterns.common.BeltState;
+import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
+import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
+import net.oxcodsnet.beltborne_lanterns.fabric.BeltNetworking;
+
+/**
+ * Accessories (WispForest) integration for Fabric.
+ *
+ * - Mirrors the belt slot state into BeltState for rendering/lighting.
+ * - Keeps inventory semantics consistent with Accessories actions.
+ * - Allows using the same toggle key (B) to unequip from the belt slot.
+ */
+public final class AccessoriesCompatFabric {
+    private AccessoriesCompatFabric() {}
+    private static final String BELT = "belt";
+    private static final java.util.Set<java.util.UUID> SYNCING = java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
+
+    public static void init() {
+        // Prepare Accessory impl
+        Accessory beltLamp = new Accessory() {
+            @Override
+            public boolean canEquip(ItemStack stack, SlotReference ref) {
+                return LampRegistry.isLamp(stack) && BELT.equals(ref.slotName());
+            }
+
+            @Override
+            public int maxStackSize(ItemStack stack) { return 1; }
+        };
+        // Initial register (may be empty if lamps not initialized yet)
+        registerAllCurrentLamps(beltLamp);
+
+        // Register for any changes in the belt slot and mirror them to BeltState
+        AccessoryChangeCallback.EVENT.register((prev, now, ref, change) -> {
+            if (!(ref.entity() instanceof ServerPlayerEntity player)) return;
+            if (!BELT.equals(ref.slotName())) return;
+
+            boolean prevIsLamp = LampRegistry.isLamp(prev);
+            boolean newIsLamp = LampRegistry.isLamp(now);
+
+            if (!prevIsLamp && newIsLamp) {
+                // A lamp was equipped into the Accessories belt slot
+                // If we previously equipped via B (not via slot), return that lamp to the player's inventory
+                if (BeltState.hasLamp(player) && !SYNCING.contains(player.getUuid())) {
+                    ItemStack stored = BeltState.getLampStack(player);
+                    if (stored != null && !stored.isEmpty() && !player.isCreative()) {
+                        player.giveItemStack(stored);
+                    }
+                }
+                // Mirror the new slot lamp into BeltState and persist
+                BeltState.setLamp(player, now);
+                BeltLanternSave.get(player.server).set(player.getUuid(), now);
+                BeltNetworking.broadcastBeltState(player, now.getItem());
+
+            } else if (prevIsLamp && !newIsLamp) {
+                // A lamp was unequipped from the Accessories belt slot
+                BeltState.setLamp(player, (Item) null);
+                BeltLanternSave.get(player.server).set(player.getUuid(), (ItemStack) null);
+                BeltNetworking.broadcastBeltState(player, null);
+
+            } else if (prevIsLamp && newIsLamp) {
+                // Lamp changed/replaced in the slot, update the mirrored state
+                BeltState.setLamp(player, now);
+                BeltLanternSave.get(player.server).set(player.getUuid(), now);
+                BeltNetworking.broadcastBeltState(player, now.getItem());
+            }
+        });
+
+        BLMod.LOGGER.info("Accessories integration active [Fabric]");
+    }
+
+    /**
+     * If the Accessories belt slot currently holds a supported lamp, unequips it and returns true.
+     * Otherwise returns false.
+     */
+    public static boolean tryToggleViaAccessories(ServerPlayerEntity player) {
+        SlotReference ref = SlotReference.of(player, BELT, 0);
+        if (!ref.isValid()) return false;
+        ItemStack stack = ref.getStack();
+        if (LampRegistry.isLamp(stack)) {
+            // Clear the slot; Accessories will handle returning the item appropriately
+            ref.setStack(ItemStack.EMPTY);
+            return true;
+        }
+        return false;
+    }
+
+    /** Returns the current stack in the Accessories belt slot, or ItemStack.EMPTY if absent. */
+    public static ItemStack getBeltStack(ServerPlayerEntity player) {
+        SlotReference ref = SlotReference.of(player, BELT, 0);
+        if (!ref.isValid()) return ItemStack.EMPTY;
+        return ref.getStack();
+    }
+
+    /** If toggled ON via B, mirror to Accessories belt slot (if empty). */
+    public static void syncToggleOnToAccessories(ServerPlayerEntity player) {
+        SlotReference ref = SlotReference.of(player, BELT, 0);
+        if (!ref.isValid()) return;
+        if (!ref.getStack().isEmpty()) return;
+        ItemStack stored = BeltState.getLampStack(player);
+        if (stored == null || stored.isEmpty()) return;
+        SYNCING.add(player.getUuid());
+        try {
+            ref.setStack(stored);
+        } finally {
+            SYNCING.remove(player.getUuid());
+        }
+    }
+
+    /** Call when lamps list may have changed (server start/tags reload). */
+    public static void refreshRegisteredAccessories() {
+        Accessory beltLamp = new Accessory() {
+            @Override
+            public boolean canEquip(ItemStack stack, SlotReference ref) {
+                return LampRegistry.isLamp(stack) && BELT.equals(ref.slotName());
+            }
+
+            @Override
+            public int maxStackSize(ItemStack stack) { return 1; }
+        };
+        registerAllCurrentLamps(beltLamp);
+    }
+
+    private static void registerAllCurrentLamps(Accessory beltLamp) {
+        for (Item item : LampRegistry.items()) {
+            AccessoriesAPI.registerAccessory(item, beltLamp);
+        }
+    }
+}

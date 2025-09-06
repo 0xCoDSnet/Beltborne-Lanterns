@@ -31,6 +31,7 @@ public final class BLNeoForgeServerEvents {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent e) {
         LampRegistry.init();
+        try { net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
     }
 
     @SubscribeEvent
@@ -39,6 +40,17 @@ public final class BLNeoForgeServerEvents {
         MinecraftServer server = joining.server;
         // Restore from persistent save (full stack with NBT) and broadcast
         var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
+
+        // If Accessories belt slot already has a lamp, prefer that as source of truth
+        try {
+            var slotStack = net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.getBeltStack(joining);
+            if (LampRegistry.isLamp(slotStack)) {
+                persistedStack = slotStack;
+            }
+        } catch (Throwable ignored) {
+            // Accessories not installed — ignore
+        }
+
         Item persisted = persistedStack != null ? persistedStack.getItem() : null;
         BeltState.setLamp(joining, persistedStack);
         BeltNetworking.broadcastBeltState(joining, persisted);
@@ -84,5 +96,6 @@ public final class BLNeoForgeServerEvents {
     @SubscribeEvent
     public static void onTagsUpdated(TagsUpdatedEvent event) {
         LampRegistry.init();
+        try { net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
     }
 }

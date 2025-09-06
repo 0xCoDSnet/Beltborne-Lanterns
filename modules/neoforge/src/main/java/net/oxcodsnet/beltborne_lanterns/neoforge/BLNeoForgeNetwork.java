@@ -39,6 +39,15 @@ public final class BLNeoForgeNetwork {
         registrar.playToServer(ToggleLanternPayload.ID, ToggleLanternPayload.CODEC, (payload, ctx) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) ctx.player();
             ctx.enqueueWork(() -> {
+                boolean handledByAccessories = false;
+                try {
+                    handledByAccessories = net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.tryToggleViaAccessories(player);
+                } catch (Throwable ignored) {
+                    // Accessories not installed or API unavailable; fall through to default logic
+                }
+
+                if (handledByAccessories) return;
+
                 ItemStack stack = player.getMainHandStack();
                 boolean hasLamp = BeltState.hasLamp(player);
                 if (!hasLamp && !LampRegistry.isLamp(stack)) {
@@ -47,6 +56,13 @@ public final class BLNeoForgeNetwork {
                 }
                 Item nowHas = BeltLanternServer.toggleLantern(player, stack);
                 BeltNetworking.broadcastBeltState(player, nowHas);
+                if (nowHas != null) {
+                    try {
+                        net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.syncToggleOnToAccessories(player);
+                    } catch (Throwable ignored) {
+                        // Accessories not installed — ignore
+                    }
+                }
             });
         });
 
