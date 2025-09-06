@@ -49,11 +49,13 @@ public final class AccessoriesCompatFabric {
 
             if (!prevIsLamp && newIsLamp) {
                 // A lamp was equipped into the Accessories belt slot
-                // If we previously equipped via B (not via slot), return that lamp to the player's inventory
+                // If we previously equipped via B (not via slot), return that lamp to the player's inventory,
+                // but only if the newly equipped stack is different from the one we already track in BeltState.
                 if (BeltState.hasLamp(player) && !SYNCING.contains(player.getUuid())) {
-                    ItemStack stored = BeltState.getLampStack(player);
-                    if (stored != null && !stored.isEmpty() && !player.isCreative()) {
-                        player.giveItemStack(stored);
+                    ItemStack current = BeltState.getLampStack(player);
+                    boolean same = current != null && ItemStack.areEqual(current, now);
+                    if (!same && !player.isCreative() && current != null && !current.isEmpty()) {
+                        player.giveItemStack(current);
                     }
                 }
                 // Mirror the new slot lamp into BeltState and persist
@@ -87,8 +89,12 @@ public final class AccessoriesCompatFabric {
         if (!ref.isValid()) return false;
         ItemStack stack = ref.getStack();
         if (LampRegistry.isLamp(stack)) {
-            // Clear the slot; Accessories will handle returning the item appropriately
+            // Programmatic unequip: explicitly return the item in survival
+            ItemStack toReturn = stack.copy();
             ref.setStack(ItemStack.EMPTY);
+            if (!player.isCreative() && !toReturn.isEmpty()) {
+                player.giveItemStack(toReturn);
+            }
             return true;
         }
         return false;
