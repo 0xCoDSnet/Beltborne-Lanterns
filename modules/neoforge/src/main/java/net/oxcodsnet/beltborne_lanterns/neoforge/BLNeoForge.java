@@ -5,7 +5,7 @@ import net.neoforged.fml.ModList;
 
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
-import net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge;
+// import net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge;
 
 @Mod(BLMod.MOD_ID)
 public final class BLNeoForge {
@@ -19,7 +19,8 @@ public final class BLNeoForge {
 
         // Accessories (WispForest) integration — only if the mod is present
         if (ModList.get().isLoaded("accessories")) {
-            AccessoriesCompatNeoForge.init();
+            // TODO: Accessories compat moved to a separate module
+            // AccessoriesCompatNeoForge.init();
         }
     }
 }

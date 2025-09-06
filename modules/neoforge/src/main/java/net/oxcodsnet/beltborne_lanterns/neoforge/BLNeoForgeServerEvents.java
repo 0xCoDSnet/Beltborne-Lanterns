@@ -51,14 +51,15 @@ public final class BLNeoForgeServerEvents {
         var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
 
         // If Accessories belt slot already has a lamp, prefer that as source of truth
-        try {
-            var slotStack = net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.getBeltStack(joining);
-            if (LampRegistry.isLamp(slotStack)) {
-                persistedStack = slotStack;
-            }
-        } catch (Throwable ignored) {
-            // Accessories not installed — ignore
-        }
+        // TODO: Accessories compat moved to a separate module
+        // try {
+        //     var slotStack = net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.getBeltStack(joining);
+        //     if (LampRegistry.isLamp(slotStack)) {
+        //         persistedStack = slotStack;
+        //     }
+        // } catch (Throwable ignored) {
+        //     // Accessories not installed — ignore
+        // }
 
         Item persisted = persistedStack != null ? persistedStack.getItem() : null;
         BeltState.setLamp(joining, persistedStack);

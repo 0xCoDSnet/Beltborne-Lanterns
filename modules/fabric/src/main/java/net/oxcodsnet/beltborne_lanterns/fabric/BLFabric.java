@@ -8,7 +8,7 @@ import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
-import net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric;
+// import net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric;
 
 public final class BLFabric implements ModInitializer {
     @Override
@@ -30,6 +30,7 @@ public final class BLFabric implements ModInitializer {
         // Accessories (WispForest) integration — only if the mod is present
         boolean hasAccessories = FabricLoader.getInstance().isModLoaded("accessories");
         if (hasAccessories) {
+            // TODO: Accessories compat moved to a separate module
             //AccessoriesCompatFabric.init();
         }
 

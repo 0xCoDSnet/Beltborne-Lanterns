@@ -1,4 +1,4 @@
-package net.oxcodsnet.beltborne_lanterns.fabric.compat;
+package net.oxcodsnet.beltborne_lanterns.fabric.compat.accessories;
 
 import io.wispforest.accessories.api.events.AccessoryChangeCallback;
 import io.wispforest.accessories.api.slot.SlotReference;
