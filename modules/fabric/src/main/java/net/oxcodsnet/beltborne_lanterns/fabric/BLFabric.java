@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
 import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
+import net.oxcodsnet.beltborne_lanterns.common.compat.CompatibilityLayerRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
@@ -23,7 +24,14 @@ public final class BLFabric implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
-        // LambDynamicLights integration is client-only; initialized from BLFabricClient.
+        // Load all compatibility layers
+        CompatibilityLayerRegistry.loadLayers(FabricLoader.getInstance()::isModLoaded);
+
+        // Common compatibility loader
+        LambDynLightsCompat.init();
+
+        // Initialize all loaded compatibility layers
+        CompatibilityLayerRegistry.initializeLayers();
 
         // Register payload types for networking.
         // These are common and need to be registered on both client and server.

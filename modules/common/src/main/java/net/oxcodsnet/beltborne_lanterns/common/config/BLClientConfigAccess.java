@@ -62,6 +62,7 @@ public final class BLClientConfigAccess {
                 lampCfg.extraLampLight.clear();
                 cfg.extraLampLight.forEach(entry -> lampCfg.extraLampLight.add(new BLClientConfig.ExtraLampEntry(entry.id, entry.luminance)));
                 BLLampConfigAccess.save();
+                // Rebuild LampRegistry from updated config
                 LampRegistry.init();
                 return ActionResult.SUCCESS;
             });
