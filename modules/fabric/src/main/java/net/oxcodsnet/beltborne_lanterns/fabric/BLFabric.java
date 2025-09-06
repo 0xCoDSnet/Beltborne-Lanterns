@@ -30,7 +30,7 @@ public final class BLFabric implements ModInitializer {
         // Accessories (WispForest) integration — only if the mod is present
         boolean hasAccessories = FabricLoader.getInstance().isModLoaded("accessories");
         if (hasAccessories) {
-            AccessoriesCompatFabric.init();
+            //AccessoriesCompatFabric.init();
         }
 
         // Register payload types for networking.

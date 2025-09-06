@@ -16,8 +16,6 @@ import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
-import io.wispforest.accessories.api.components.AccessoriesDataComponents;
-import io.wispforest.accessories.api.components.AccessorySlotValidationComponent;
 
 import java.util.LinkedHashMap;
 
@@ -98,8 +96,6 @@ public final class BLFabricServerEvents {
                 BeltNetworking.sendTo(joining, other.getUuid(), lamp);
             }
 
-            // Ensure inventory items are marked as valid for the belt slot via component validator
-            try { ensureBeltValidationOnLamps(joining); } catch (Throwable ignored) {}
         });
 
         // On disconnect, persist the current state for that player
@@ -124,29 +120,23 @@ public final class BLFabricServerEvents {
         // Lifecycle events
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             LampRegistry.init();
-            try { net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
+            // Write runtime datapack with tag entries from config and suggest reload if changed
+            boolean dpChanged = net.oxcodsnet.beltborne_lanterns.common.datapack.BLRuntimeDataPack.writeOrUpdate(server);
+            // Accessories acceptance is handled via tags (runtime datapack)
+            if (dpChanged) {
+                // Attempt a one-time /reload to apply the new datapack
+                try {
+                    server.getCommandManager().executeWithPrefix(server.getCommandSource(), "reload");
+                } catch (Throwable t) {
+                    net.oxcodsnet.beltborne_lanterns.BLMod.LOGGER.info("Runtime datapack updated — please run /reload to apply");
+                }
+            }
         });
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
             LampRegistry.init();
-            try { net.oxcodsnet.beltborne_lanterns.fabric.compat.AccessoriesCompatFabric.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
-            // After tags reload, ensure all online players' inventories carry the belt validation component
-            try {
-                for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) ensureBeltValidationOnLamps(p);
-            } catch (Throwable ignored) {}
+            // Keep runtime datapack in sync on reload
+            net.oxcodsnet.beltborne_lanterns.common.datapack.BLRuntimeDataPack.writeOrUpdate(server);
+            // Accessories acceptance is handled via tags (runtime datapack)
         });
-    }
-
-    private static void ensureBeltValidationOnLamps(ServerPlayerEntity player) {
-        var inv = player.getInventory();
-        int size = inv.size();
-        for (int i = 0; i < size; i++) {
-            var stack = inv.getStack(i);
-            if (stack == null || stack.isEmpty()) continue;
-            if (!LampRegistry.isLamp(stack)) continue;
-            var comp = stack.get(AccessoriesDataComponents.SLOT_VALIDATION);
-            // addValidSlot returns a new instance; start from EMPTY if none
-            var withBelt = (comp == null ? AccessorySlotValidationComponent.EMPTY : comp).addValidSlot("accessories:belt");
-            stack.set(AccessoriesDataComponents.SLOT_VALIDATION, withBelt);
-        }
     }
 }

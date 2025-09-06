@@ -19,8 +19,6 @@ import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
 import net.oxcodsnet.beltborne_lanterns.neoforge.BeltNetworking;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
-import io.wispforest.accessories.api.components.AccessoriesDataComponents;
-import io.wispforest.accessories.api.components.AccessorySlotValidationComponent;
 
 /**
  * Server-side interaction + sync logic for NeoForge.
@@ -33,7 +31,16 @@ public final class BLNeoForgeServerEvents {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent e) {
         LampRegistry.init();
-        try { net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
+        var server = e.getServer();
+        // Write runtime datapack with tag entries from config and suggest reload if changed
+        boolean dpChanged = net.oxcodsnet.beltborne_lanterns.common.datapack.BLRuntimeDataPack.writeOrUpdate(server);
+        if (dpChanged) {
+            try {
+                server.getCommandManager().executeWithPrefix(server.getCommandSource(), "reload");
+            } catch (Throwable t) {
+                net.oxcodsnet.beltborne_lanterns.BLMod.LOGGER.info("Runtime datapack updated — please run /reload to apply");
+            }
+        }
     }
 
     @SubscribeEvent
@@ -71,8 +78,6 @@ public final class BLNeoForgeServerEvents {
             BeltNetworking.sendTo(joining, other.getUuid(), lamp);
         }
 
-        // Ensure inventory items are marked as valid for the belt slot via component validator
-        try { ensureBeltValidationOnLamps(joining); } catch (Throwable ignored) {}
     }
 
     @SubscribeEvent
@@ -96,34 +101,15 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity player)) return;
         Item lamp = BeltState.getLamp(player);
         BeltNetworking.broadcastBeltState(player, lamp);
-        try { ensureBeltValidationOnLamps(player); } catch (Throwable ignored) {}
     }
 
     @SubscribeEvent
     public static void onTagsUpdated(TagsUpdatedEvent event) {
-        LampRegistry.init();
-        try { net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge.refreshRegisteredAccessories(); } catch (Throwable ignored) {}
-        try {
-            if (event.getUpdateCause().isRegistryAccess()) {
-                // After tags reload, ensure all online players' inventories carry the belt validation component
-                var srv = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
-                if (srv != null) {
-                    for (ServerPlayerEntity p : srv.getPlayerManager().getPlayerList()) ensureBeltValidationOnLamps(p);
-                }
-            }
-        } catch (Throwable ignored) {}
-    }
-
-    private static void ensureBeltValidationOnLamps(ServerPlayerEntity player) {
-        var inv = player.getInventory();
-        int size = inv.size();
-        for (int i = 0; i < size; i++) {
-            var stack = inv.getStack(i);
-            if (stack == null || stack.isEmpty()) continue;
-            if (!LampRegistry.isLamp(stack)) continue;
-            var comp = stack.get(AccessoriesDataComponents.SLOT_VALIDATION);
-            var withBelt = (comp == null ? AccessorySlotValidationComponent.EMPTY : comp).addValidSlot("accessories:belt");
-            stack.set(AccessoriesDataComponents.SLOT_VALIDATION, withBelt);
+        var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            // Keep runtime datapack in sync on reload
+            net.oxcodsnet.beltborne_lanterns.common.datapack.BLRuntimeDataPack.writeOrUpdate(server);
         }
+        LampRegistry.init();
     }
 }

@@ -1,7 +1,5 @@
 package net.oxcodsnet.beltborne_lanterns.neoforge.compat;
 
-import io.wispforest.accessories.api.AccessoriesAPI;
-import io.wispforest.accessories.api.Accessory;
 import io.wispforest.accessories.api.events.AccessoryChangeCallback;
 import io.wispforest.accessories.api.slot.SlotReference;
 import net.minecraft.item.Item;
@@ -26,19 +24,6 @@ public final class AccessoriesCompatNeoForge {
     private static final java.util.Set<java.util.UUID> SYNCING = java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
 
     public static void init() {
-        // Prepare Accessory impl
-        Accessory beltLamp = new Accessory() {
-            @Override
-            public boolean canEquip(ItemStack stack, SlotReference ref) {
-                boolean ok = LampRegistry.isLamp(stack) && isBeltSlot(ref);
-                return ok;
-            }
-
-            @Override
-            public int maxStackSize(ItemStack stack) { return 1; }
-        };
-        registerAllCurrentLamps(beltLamp);
-
         AccessoryChangeCallback.EVENT.register((prev, now, ref, change) -> {
             if (!(ref.entity() instanceof ServerPlayerEntity player)) return;
             if (!isBeltSlot(ref)) return;
@@ -68,10 +53,6 @@ public final class AccessoriesCompatNeoForge {
             }
         });
 
-        // Expose refresh hook to common code
-        net.oxcodsnet.beltborne_lanterns.common.compat.AccessoriesCompatBridge.setRefreshCallback(
-                net.oxcodsnet.beltborne_lanterns.neoforge.compat.AccessoriesCompatNeoForge::refreshRegisteredAccessories
-        );
         BLMod.LOGGER.info("Accessories integration active [NeoForge]");
     }
 
@@ -112,27 +93,5 @@ public final class AccessoriesCompatNeoForge {
         }
     }
 
-    /** Call when lamps list may have changed (server start/tags reload). */
-    public static void refreshRegisteredAccessories() {
-        Accessory beltLamp = new Accessory() {
-            @Override
-            public boolean canEquip(ItemStack stack, SlotReference ref) {
-                return LampRegistry.isLamp(stack) && BELT.equals(ref.slotName());
-            }
-
-            @Override
-            public int maxStackSize(ItemStack stack) { return 1; }
-        };
-        registerAllCurrentLamps(beltLamp);
-    }
-
-    private static void registerAllCurrentLamps(Accessory beltLamp) {
-        for (Item item : LampRegistry.items()) {
-            AccessoriesAPI.registerAccessory(item, beltLamp);
-            try {
-                var id = net.oxcodsnet.beltborne_lanterns.common.LampRegistry.getId(item);
-                net.oxcodsnet.beltborne_lanterns.BLMod.LOGGER.debug("Accessories: registered belt accessory for {}", id);
-            } catch (Throwable ignored) {}
-        }
-    }
+    // No registration needed when acceptance is driven by tags; we only listen for changes
 }
