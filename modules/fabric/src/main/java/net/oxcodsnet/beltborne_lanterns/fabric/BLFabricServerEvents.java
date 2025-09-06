@@ -11,6 +11,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
 import net.oxcodsnet.beltborne_lanterns.common.BeltState;
 import net.oxcodsnet.beltborne_lanterns.common.LampRegistry;
+import net.oxcodsnet.beltborne_lanterns.common.compat.CompatibilityLayerRegistry;
 import net.oxcodsnet.beltborne_lanterns.common.config.BLLampConfigAccess;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
@@ -30,6 +31,11 @@ public final class BLFabricServerEvents {
         ServerPlayNetworking.registerGlobalReceiver(ToggleLanternPayload.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
             context.server().execute(() -> {
+                // Try to toggle lantern via compatibility layers
+                for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                    if (layer.tryToggleLantern(player)) return;
+                }
+
                 ItemStack stack = player.getMainHandStack();
                 boolean hasLamp = BeltState.hasLamp(player);
                 if (!hasLamp && !LampRegistry.isLamp(stack)) {
@@ -38,6 +44,12 @@ public final class BLFabricServerEvents {
                 }
                 Item nowHas = BeltLanternServer.toggleLantern(player, stack);
                 BeltNetworking.broadcastBeltState(player, nowHas);
+                if (nowHas != null) {
+                    // Sync to compatibility layers
+                    for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                        layer.syncToggleOn(player);
+                    }
+                }
             });
         });
 
@@ -46,6 +58,16 @@ public final class BLFabricServerEvents {
             ServerPlayerEntity joining = handler.getPlayer();
             // Restore from persistent save (full stack with NBT)
             var persistedStack = BeltLanternSave.get(server).getStack(joining.getUuid());
+
+            // If a compatibility layer has a belt stack, prefer that as source of truth
+            for (var layer : CompatibilityLayerRegistry.getLayers()) {
+                var slotStack = layer.getBeltStack(joining);
+                if (slotStack.isPresent() && LampRegistry.isLamp(slotStack.get())) {
+                    persistedStack = slotStack.get();
+                    break;
+                }
+            }
+
             Item persisted = persistedStack != null ? persistedStack.getItem() : null;
             BeltState.setLamp(joining, persistedStack);
             // Tell everyone (and self) about joining player's state (by item type)
@@ -65,6 +87,7 @@ public final class BLFabricServerEvents {
                 Item lamp = BeltState.getLamp(other);
                 BeltNetworking.sendTo(joining, other.getUuid(), lamp);
             }
+
         });
 
         // On disconnect, persist the current state for that player
@@ -87,7 +110,25 @@ public final class BLFabricServerEvents {
         });
 
         // Lifecycle events
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> LampRegistry.init());
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> LampRegistry.init());
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            LampRegistry.init();
+            // Write runtime datapack with tag entries from config and suggest reload if changed
+            boolean dpChanged = net.oxcodsnet.beltborne_lanterns.common.datapack.BLRuntimeDataPack.writeOrUpdate(server);
+            // Accessories acceptance is handled via tags (runtime datapack)
+            if (dpChanged) {
+                // Attempt a one-time /reload to apply the new datapack
+                try {
+                    server.getCommandManager().executeWithPrefix(server.getCommandSource(), "reload");
+                } catch (Throwable t) {
+                    net.oxcodsnet.beltborne_lanterns.BLMod.LOGGER.info("Runtime datapack updated — please run /reload to apply");
+                }
+            }
+        });
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
+            LampRegistry.init();
+            // Keep runtime datapack in sync on reload
+            net.oxcodsnet.beltborne_lanterns.common.datapack.BLRuntimeDataPack.writeOrUpdate(server);
+            // Accessories acceptance is handled via tags (runtime datapack)
+        });
     }
 }
