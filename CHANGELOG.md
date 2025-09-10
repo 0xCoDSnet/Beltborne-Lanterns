@@ -1,3 +1,3 @@
 ## Changelog
 ### 🚀 Added
-- API to support multiple compatibility layers.
+- Atomicstryker Dynamiclights support for 1.21 [NeoForge]
