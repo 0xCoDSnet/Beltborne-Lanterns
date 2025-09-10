@@ -1,3 +1,3 @@
 ## Changelog
 ### 🚀 Added
-- Atomicstryker Dynamiclights support for 1.21 [NeoForge]
+- Atomicstryker Dynamiclights support [NeoForge]
