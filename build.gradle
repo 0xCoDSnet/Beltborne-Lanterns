@@ -16,6 +16,97 @@ allprojects {
     version = rootProject.mod_version
 }
 
+// ====================== Maven (.env) ====================
+// ---- helpers for Maven repository configuration ----
+ext.resolveMavenRepoUrl = {
+    def v = System.getenv("MAVEN_REPO_URL") ?: System.getenv("MAVEN_URL")
+    if (!v) {
+        def e = rootProject.extensions.findByName("env")
+        if (e != null) {
+            if (e.isPresent("MAVEN_REPO_URL")) v = e.fetch("MAVEN_REPO_URL")
+            else if (e.isPresent("MAVEN_URL"))  v = e.fetch("MAVEN_URL")
+            else if (e.isPresent("maven_repo_url")) v = e.fetch("maven_repo_url")
+            else if (e.isPresent("maven_url"))      v = e.fetch("maven_url")
+        }
+    }
+    if (!v && rootProject.hasProperty("MAVEN_REPO_URL")) v = rootProject.property("MAVEN_REPO_URL")?.toString()
+    if (!v && rootProject.hasProperty("MAVEN_URL"))      v = rootProject.property("MAVEN_URL")?.toString()
+    return v
+}
+
+ext.resolveMavenRepoUsername = {
+    def v = System.getenv("MAVEN_REPO_USERNAME") ?: System.getenv("MAVEN_REPO_USER") ?: System.getenv("MAVEN_USERNAME") ?: System.getenv("MAVEN_USER")
+    if (!v) {
+        def e = rootProject.extensions.findByName("env")
+        if (e != null) {
+            ["MAVEN_REPO_USERNAME","MAVEN_REPO_USER","MAVEN_USERNAME","MAVEN_USER","maven_repo_username","maven_repo_user","maven_username","maven_user"].find {
+                if (e.isPresent(it)) { v = e.fetch(it); return true }
+                return false
+            }
+        }
+    }
+    if (!v) {
+        ["MAVEN_REPO_USERNAME","MAVEN_REPO_USER","MAVEN_USERNAME","MAVEN_USER"].find {
+            if (rootProject.hasProperty(it)) { v = rootProject.property(it)?.toString(); return true }
+            return false
+        }
+    }
+    return v
+}
+
+ext.resolveMavenRepoPassword = {
+    def v = System.getenv("MAVEN_REPO_PASSWORD") ?: System.getenv("MAVEN_PASSWORD")
+    if (!v) {
+        def e = rootProject.extensions.findByName("env")
+        if (e != null) {
+            ["MAVEN_REPO_PASSWORD","MAVEN_PASSWORD","maven_repo_password","maven_password"].find {
+                if (e.isPresent(it)) { v = e.fetch(it); return true }
+                return false
+            }
+        }
+    }
+    if (!v) {
+        ["MAVEN_REPO_PASSWORD","MAVEN_PASSWORD"].find {
+            if (rootProject.hasProperty(it)) { v = rootProject.property(it)?.toString(); return true }
+            return false
+        }
+    }
+    return v
+}
+
+ext.resolveMavenRepoToken = {
+    def v = System.getenv("MAVEN_REPO_TOKEN") ?: System.getenv("MAVEN_TOKEN")
+    if (!v) {
+        def e = rootProject.extensions.findByName("env")
+        if (e != null) {
+            ["MAVEN_REPO_TOKEN","MAVEN_TOKEN","maven_repo_token","maven_token"].find {
+                if (e.isPresent(it)) { v = e.fetch(it); return true }
+                return false
+            }
+        }
+    }
+    if (!v) {
+        ["MAVEN_REPO_TOKEN","MAVEN_TOKEN"].find {
+            if (rootProject.hasProperty(it)) { v = rootProject.property(it)?.toString(); return true }
+            return false
+        }
+    }
+    return v
+}
+
+ext.resolveMavenRepoName = {
+    def v = System.getenv("MAVEN_REPO_NAME")
+    if (!v) {
+        def e = rootProject.extensions.findByName("env")
+        if (e != null) {
+            if (e.isPresent("MAVEN_REPO_NAME")) v = e.fetch("MAVEN_REPO_NAME")
+            else if (e.isPresent("maven_repo_name")) v = e.fetch("maven_repo_name")
+        }
+    }
+    if (!v && rootProject.hasProperty("MAVEN_REPO_NAME")) v = rootProject.property("MAVEN_REPO_NAME")?.toString()
+    return v ?: "private"
+}
+
 // ====================== CurseForge ====================
 // ---- helpers for CurseForge ----
 ext.resolveCurseforgeToken = {
@@ -89,7 +180,6 @@ subprojects {
     repositories {
         mavenLocal()
 
-        maven { url = uri('https://maven.wispforest.io') }
         maven { url = uri('https://maven.terraformersmc.com/') }
         maven { url = uri('https://maven.shedaniel.me/') }
     }
@@ -121,19 +211,114 @@ subprojects {
 
     // Configure Maven publishing.
     publishing {
+        def mcClassifier = "mc" + rootProject.minecraft_version
+
         publications {
             mavenJava(MavenPublication) {
+                // Стабильный artifactId (без -dev)
                 artifactId = base.archivesName.get()
-                from components.java
+
+                // --- обычные артефакты по MC-классификатору ---
+                if (tasks.findByName('remapJar')) {
+                    artifact(tasks.named('remapJar')) {
+                        classifier = mcClassifier
+                        builtBy(tasks.named('remapJar'))
+                    }
+
+                    if (tasks.findByName('remapSourcesJar')) {
+                        artifact(tasks.named('remapSourcesJar')) {
+                            classifier = "sources-${mcClassifier}"
+                            builtBy(tasks.named('remapSourcesJar'))
+                        }
+                    } else if (tasks.findByName('sourcesJar')) {
+                        artifact(tasks.named('sourcesJar')) {
+                            classifier = "sources-${mcClassifier}"
+                            builtBy(tasks.named('sourcesJar'))
+                        }
+                    }
+                } else {
+                    if (tasks.findByName('jar')) {
+                        artifact(tasks.named('jar')) {
+                            classifier = mcClassifier
+                            builtBy(tasks.named('jar'))
+                        }
+                    }
+                    if (tasks.findByName('sourcesJar')) {
+                        artifact(tasks.named('sourcesJar')) {
+                            classifier = "sources-${mcClassifier}"
+                            builtBy(tasks.named('sourcesJar'))
+                        }
+                    }
+                }
+
+                // dev/fat будет добавлен позже через plugins.withId('com.gradleup.shadow')
             }
         }
 
-        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+        // Репозиторий — как у тебя, из .env/props
         repositories {
-            // Add repositories to publish to here.
-            // Notice: This block does NOT have the same function as the block in the top level.
-            // The repositories here will be used for publishing your artifact, not for
-            // retrieving dependencies.
+            def repoUrl = rootProject.ext.resolveMavenRepoUrl()
+            if (repoUrl) {
+                maven {
+                    name = rootProject.ext.resolveMavenRepoName()
+                    url = uri(repoUrl)
+
+                    def user  = rootProject.ext.resolveMavenRepoUsername()
+                    def pass  = rootProject.ext.resolveMavenRepoPassword()
+                    def token = rootProject.ext.resolveMavenRepoToken()
+
+                    if ((user && pass) || token) {
+                        credentials {
+                            if (user && pass) {
+                                username = user; password = pass
+                            } else {
+                                username = user ?: 'token'; password = token
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Добавляем dev (shadowJar) к публикации mavenJava ПОСЛЕ применения Shadow плагина в модуле
+    plugins.withId('com.gradleup.shadow') {
+        publishing {
+            publications {
+                named('mavenJava', MavenPublication) {
+                    def mcClassifier = "mc" + rootProject.minecraft_version
+                    artifact(tasks.named('shadowJar')) {
+                        classifier = "dev-${mcClassifier}"
+                        builtBy(tasks.named('shadowJar'))
+                    }
+                }
+            }
+        }
+    }
+
+
+//    // Explicit dev-shadow publication per platform module, only when Shadow is applied
+//    plugins.withId('com.gradleup.shadow') {
+//        publishing {
+//            def mcClassifier = "mc" + rootProject.minecraft_version
+//            publications {
+//                devShadow(MavenPublication) {
+//                    artifactId = base.archivesName.get() + "-dev"
+//                    artifact(tasks.named('shadowJar')) {
+//                        classifier = mcClassifier
+//                        builtBy(tasks.named('shadowJar'))
+//                    }
+//                }
+//            }
+//        }
+//    }
+}
+
+// Aggregate task to publish all platform modules to Maven
+tasks.register("publishMavenAll") {
+    ["common", "fabric", "neoforge", "quilt"].each { plat ->
+        if (findProject(":modules:${plat}") != null) {
+            dependsOn(":modules:${plat}:publish")
         }
     }
 }
