@@ -49,6 +49,7 @@ dependencies {
 
     common(project(path: ':modules:common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionFabric')
+
 }
 
 repositories {
