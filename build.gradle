@@ -212,73 +212,67 @@ subprojects {
     // Configure Maven publishing.
     publishing {
         def mcClassifier = "mc" + rootProject.minecraft_version
+
         publications {
             mavenJava(MavenPublication) {
-                // Keep artifactId stable per platform (no MC in artifactId)
+                // Стабильный artifactId (без -dev)
                 artifactId = base.archivesName.get()
-                // Use classifier to encode Minecraft version, keep SemVer in version only.
-                def hasRemap = tasks.findByName('remapJar') != null
-                if (hasRemap) {
-                    // Runtime artifact: remapped jar with MC classifier
+
+                // --- обычные артефакты по MC-классификатору ---
+                if (tasks.findByName('remapJar')) {
                     artifact(tasks.named('remapJar')) {
                         classifier = mcClassifier
                         builtBy(tasks.named('remapJar'))
                     }
 
-                    // Sources for that MC
-                    def hasRemapSources = tasks.findByName('remapSourcesJar') != null
-                    if (hasRemapSources) {
+                    if (tasks.findByName('remapSourcesJar')) {
                         artifact(tasks.named('remapSourcesJar')) {
-                            classifier = "sources-" + mcClassifier
+                            classifier = "sources-${mcClassifier}"
                             builtBy(tasks.named('remapSourcesJar'))
                         }
-                    } else if (tasks.findByName('sourcesJar') != null) {
-                        artifact(tasks.named('sourcesJar')) { classifier = "sources-" + mcClassifier }
+                    } else if (tasks.findByName('sourcesJar')) {
+                        artifact(tasks.named('sourcesJar')) {
+                            classifier = "sources-${mcClassifier}"
+                            builtBy(tasks.named('sourcesJar'))
+                        }
                     }
-
                 } else {
-                    // Common module: publish jar and sources with MC classifier as attachments
-                    if (tasks.findByName('jar') != null) {
-                        artifact(tasks.named('jar')) { classifier = mcClassifier }
+                    if (tasks.findByName('jar')) {
+                        artifact(tasks.named('jar')) {
+                            classifier = mcClassifier
+                            builtBy(tasks.named('jar'))
+                        }
                     }
-                    if (tasks.findByName('sourcesJar') != null) {
-                        artifact(tasks.named('sourcesJar')) { classifier = "sources-" + mcClassifier }
-                    }
-                }
-            }
-            // Explicit dev-shadow publication per platform module
-            if (tasks.findByName('shadowJar') != null) {
-                devShadow(MavenPublication) {
-                    artifactId = base.archivesName.get() + "-dev"
-                    artifact(tasks.named('shadowJar')) {
-                        classifier = mcClassifier
-                        builtBy(tasks.named('shadowJar'))
+                    if (tasks.findByName('sourcesJar')) {
+                        artifact(tasks.named('sourcesJar')) {
+                            classifier = "sources-${mcClassifier}"
+                            builtBy(tasks.named('sourcesJar'))
+                        }
                     }
                 }
+
+                // dev/fat будет добавлен позже через plugins.withId('com.gradleup.shadow')
             }
         }
 
-        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+        // Репозиторий — как у тебя, из .env/props
         repositories {
-            // Configure target Maven repository from .env / environment
             def repoUrl = rootProject.ext.resolveMavenRepoUrl()
             if (repoUrl) {
                 maven {
                     name = rootProject.ext.resolveMavenRepoName()
                     url = uri(repoUrl)
 
-                    def user = rootProject.ext.resolveMavenRepoUsername()
-                    def pass = rootProject.ext.resolveMavenRepoPassword()
+                    def user  = rootProject.ext.resolveMavenRepoUsername()
+                    def pass  = rootProject.ext.resolveMavenRepoPassword()
                     def token = rootProject.ext.resolveMavenRepoToken()
 
                     if ((user && pass) || token) {
                         credentials {
                             if (user && pass) {
-                                username = user
-                                password = pass
-                            } else if (token) {
-                                username = user ?: 'token'
-                                password = token
+                                username = user; password = pass
+                            } else {
+                                username = user ?: 'token'; password = token
                             }
                         }
                     }
@@ -286,6 +280,38 @@ subprojects {
             }
         }
     }
+
+    // Добавляем dev (shadowJar) к публикации mavenJava ПОСЛЕ применения Shadow плагина в модуле
+    plugins.withId('com.gradleup.shadow') {
+        publishing {
+            publications {
+                named('mavenJava', MavenPublication) {
+                    def mcClassifier = "mc" + rootProject.minecraft_version
+                    artifact(tasks.named('shadowJar')) {
+                        classifier = "dev-${mcClassifier}"
+                        builtBy(tasks.named('shadowJar'))
+                    }
+                }
+            }
+        }
+    }
+
+
+//    // Explicit dev-shadow publication per platform module, only when Shadow is applied
+//    plugins.withId('com.gradleup.shadow') {
+//        publishing {
+//            def mcClassifier = "mc" + rootProject.minecraft_version
+//            publications {
+//                devShadow(MavenPublication) {
+//                    artifactId = base.archivesName.get() + "-dev"
+//                    artifact(tasks.named('shadowJar')) {
+//                        classifier = mcClassifier
+//                        builtBy(tasks.named('shadowJar'))
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
 
 // Aggregate task to publish all platform modules to Maven
