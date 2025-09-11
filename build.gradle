@@ -211,33 +211,48 @@ subprojects {
 
     // Configure Maven publishing.
     publishing {
+        def mcClassifier = "mc" + rootProject.minecraft_version
         publications {
             mavenJava(MavenPublication) {
+                // Keep artifactId stable per platform (no MC in artifactId)
                 artifactId = base.archivesName.get()
-                // Platform modules (fabric/neoforge) publish remapped jar and dev-shadow;
-                // Common module publishes regular jar + sources.
+                // Use classifier to encode Minecraft version, keep SemVer in version only.
                 def hasRemap = tasks.findByName('remapJar') != null
                 if (hasRemap) {
-                    // Main: remapped production jar
-                    artifact(tasks.named("remapJar")) { builtBy(tasks.named("remapJar")) }
+                    // Runtime artifact: remapped jar with MC classifier
+                    artifact(tasks.named('remapJar')) {
+                        classifier = mcClassifier
+                        builtBy(tasks.named('remapJar'))
+                    }
 
-                    // Sources: prefer remapped sources if available
+                    // Sources for that MC
                     def hasRemapSources = tasks.findByName('remapSourcesJar') != null
                     if (hasRemapSources) {
-                        artifact(tasks.named("remapSourcesJar")) { classifier = 'sources'; builtBy(tasks.named("remapSourcesJar")) }
+                        artifact(tasks.named('remapSourcesJar')) {
+                            classifier = "sources-" + mcClassifier
+                            builtBy(tasks.named('remapSourcesJar'))
+                        }
                     } else if (tasks.findByName('sourcesJar') != null) {
-                        artifact(tasks.named("sourcesJar")) { classifier = 'sources' }
+                        artifact(tasks.named('sourcesJar')) { classifier = "sources-" + mcClassifier }
                     }
 
-                    // Also publish the development shadow jar (unmapped) with classifier 'dev-shadow'
-                    if (tasks.findByName('shadowJar') != null) {
-                        artifact(tasks.named("shadowJar")) { classifier = 'dev-shadow' }
-                    }
                 } else {
-                    // Common module: use Java component (includes POM metadata) + sources
-                    from components.java
+                    // Common module: publish jar and sources with MC classifier as attachments
+                    if (tasks.findByName('jar') != null) {
+                        artifact(tasks.named('jar')) { classifier = mcClassifier }
+                    }
                     if (tasks.findByName('sourcesJar') != null) {
-                        artifact(tasks.named("sourcesJar")) { classifier = 'sources' }
+                        artifact(tasks.named('sourcesJar')) { classifier = "sources-" + mcClassifier }
+                    }
+                }
+            }
+            // Explicit dev-shadow publication per platform module
+            if (tasks.findByName('shadowJar') != null) {
+                devShadow(MavenPublication) {
+                    artifactId = base.archivesName.get() + "-dev"
+                    artifact(tasks.named('shadowJar')) {
+                        classifier = mcClassifier
+                        builtBy(tasks.named('shadowJar'))
                     }
                 }
             }
