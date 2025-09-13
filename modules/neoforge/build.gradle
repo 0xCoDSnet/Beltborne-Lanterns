@@ -55,7 +55,6 @@ processResources {
             version              : project.version,
             mod_name             : rootProject.findProperty('mod_name'),
             mod_id               : rootProject.findProperty('mod_id'),
-            mod_name             : rootProject.findProperty('mod_name'),
             mod_description      : rootProject.findProperty('mod_description'),
             mod_authors          : rootProject.findProperty('mod_authors'),
             mod_homepage         : rootProject.findProperty('mod_homepage'),
