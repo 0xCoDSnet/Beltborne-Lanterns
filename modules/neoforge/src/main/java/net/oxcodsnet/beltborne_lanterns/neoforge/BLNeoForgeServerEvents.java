@@ -21,6 +21,7 @@ import net.oxcodsnet.beltborne_lanterns.common.persistence.BeltLanternSave;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
 import net.oxcodsnet.beltborne_lanterns.neoforge.BeltNetworking;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
+import net.oxcodsnet.beltborne_lanterns.common.DynamicLightsCompat;
 
 /**
  * Server-side interaction + sync logic for NeoForge.
@@ -64,6 +65,10 @@ public final class BLNeoForgeServerEvents {
         Item persisted = persistedStack != null ? persistedStack.getItem() : null;
         BeltState.setLamp(joining, persistedStack);
         BeltNetworking.broadcastBeltState(joining, persisted);
+        if (persisted != null) {
+            // Ensure dynamic light is active on join when lamp is equipped
+            DynamicLightsCompat.addFor(joining);
+        }
         // If on a dedicated server, send its lamp config to the joining player.
         // In single player, the client's config is trusted as the source of truth.
         if (server.isDedicated()) {
@@ -86,6 +91,8 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity leaving)) return;
         // Persist full stack with NBT on disconnect
         BeltLanternSave.get(leaving.getServer()).set(leaving.getUuid(), BeltState.getLampStack(leaving));
+        // Clean up dynamic light source when leaving
+        DynamicLightsCompat.removeFor(leaving);
     }
 
     @SubscribeEvent
@@ -96,6 +103,8 @@ public final class BLNeoForgeServerEvents {
         ServerPlayerEntity newPlayer = (ServerPlayerEntity) event.getEntity();
         boolean keep = oldPlayer.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
         BeltLanternServer.handleDeath(oldPlayer, newPlayer, keep);
+        // Remove dynamic light from the dying player entity
+        DynamicLightsCompat.removeFor(oldPlayer);
     }
 
     @SubscribeEvent
@@ -103,6 +112,10 @@ public final class BLNeoForgeServerEvents {
         if (!(event.getEntity() instanceof ServerPlayerEntity player)) return;
         Item lamp = BeltState.getLamp(player);
         BeltNetworking.broadcastBeltState(player, lamp);
+        if (lamp != null) {
+            // Re-create dynamic light for the new player entity
+            DynamicLightsCompat.addFor(player);
+        }
     }
 
     @SubscribeEvent
