@@ -1,8 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "#beltborne_lanterns:lamps",
-    "minecraft:lantern",
-    "minecraft:soul_lantern"
-  ]
-}
