@@ -48,6 +48,15 @@ public final class DynamicLightsCompat {
                 new Class<?>[]{lightInterface},
                 (p, m, args) -> {
                     String name = m.getName();
+                    // Ensure Object methods behave correctly on proxies
+                    if ("equals".equals(name)) {
+                        // Reference equality is what DynamicLights expects when removing
+                        return Boolean.valueOf(p == (args != null && args.length == 1 ? args[0] : null));
+                    } else if ("hashCode".equals(name)) {
+                        return Integer.valueOf(System.identityHashCode(p));
+                    } else if ("toString".equals(name)) {
+                        return "BeltborneDLSource{" + player.getGameProfile().getName() + ":" + player.getUuid() + "}";
+                    }
                     if ("getAttachmentEntity".equals(name)) {
                         return player; // runtime-mapped entity instance
                     } else if ("getLightLevel".equals(name)) {
@@ -77,4 +86,3 @@ public final class DynamicLightsCompat {
         }
     }
 }
-
