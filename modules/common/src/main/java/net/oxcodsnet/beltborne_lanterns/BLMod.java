@@ -9,6 +9,4 @@ public final class BLMod {
     // Use readable mod name as logger category for nicer log lines
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
     public static void init() {}
-
-    // TODO: теги для Accessories перенести в свой мод-слой
 }

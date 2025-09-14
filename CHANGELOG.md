@@ -1,3 +1,3 @@
 ## Changelog
-### 🚀 Added
-- Atomicstryker Dynamiclights support for 1.21 [NeoForge]
+### 🐞 Bug fixes 
+- Fixed rare crashes on NeoForge due to a hidden NPE when using `Atomicstryker Dynamiclights` 
