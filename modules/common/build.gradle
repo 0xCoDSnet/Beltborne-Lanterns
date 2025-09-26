@@ -2,7 +2,13 @@ architectury {
     common rootProject.enabled_platforms.split(',')
 }
 
+def mappingsAttribute = Attribute.of("net.minecraft.mappings", String.class)
+
 dependencies {
+    attributesSchema {
+        attribute(mappingsAttribute)
+    }
+
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
@@ -12,6 +18,10 @@ dependencies {
     //modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
 
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_version}"
+
+    // Optional: LambDynamicLights 4.x API for typed integration (compile-only)
+    // Use Mojang-mapped attribute to ensure generics are remappable to Yarn
+    modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${rootProject.lambdynamiclights_version}")
 
     // Generate Mixin refmap for shared mixins compiled in :common
     annotationProcessor "org.spongepowered:mixin:0.8.7:processor"
