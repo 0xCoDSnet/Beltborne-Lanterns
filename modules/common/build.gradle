@@ -2,13 +2,7 @@ architectury {
     common rootProject.enabled_platforms.split(',')
 }
 
-def mappingsAttribute = Attribute.of("net.minecraft.mappings", String.class)
-
 dependencies {
-    attributesSchema {
-        attribute(mappingsAttribute)
-    }
-
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
