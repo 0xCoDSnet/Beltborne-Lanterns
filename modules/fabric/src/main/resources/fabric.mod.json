@@ -24,6 +24,9 @@
     ],
     "modmenu": [
       "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricModMenu"
+    ],
+    "lambdynlights": [
+      "net.oxcodsnet.beltborne_lanterns.fabric.compat.LambDynLightsInitializer"
     ]
   },
   "mixins": [
@@ -32,7 +35,7 @@
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "minecraft": "~${minecraft_version}",
-    "java": ">=21",
+    "java": ">=17",
     "fabric-api": "*",
     "cloth-config2": ">=${cloth_config_version}"
   },

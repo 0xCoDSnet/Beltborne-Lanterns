@@ -15,7 +15,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.oxcodsnet.beltborne_lanterns.fabric.compat.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
@@ -89,10 +88,6 @@ public final class BLFabricClient implements ClientModInitializer {
             }
         });
 
-        // Optionally register dynamic lights for the belt lantern when LambDynamicLights is present
-        boolean hasLamb = FabricLoader.getInstance().isModLoaded("lambdynlights");
-        if (hasLamb) LambDynLightsCompat.init();
-
         // Keybind to open config (default: L)
         openConfigKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.beltborne_lanterns.open_config",
@@ -156,6 +151,7 @@ public final class BLFabricClient implements ClientModInitializer {
         });
 
         // Final client-ready log (concise, useful to players)
+        boolean hasLamb = FabricLoader.getInstance().isModLoaded("lambdynlights");
         String dyn = hasLamb ? "enabled" : "disabled";
         BLMod.LOGGER.info("Client ready [Fabric]. Dynamic lights: {}.", dyn);
     }

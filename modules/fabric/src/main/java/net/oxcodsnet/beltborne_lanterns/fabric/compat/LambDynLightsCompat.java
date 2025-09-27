@@ -1,6 +1,6 @@
 package net.oxcodsnet.beltborne_lanterns.fabric.compat;
 
-import dev.lambdaurora.lambdynlights.LambDynLights;
+import dev.lambdaurora.lambdynlights.api.DynamicLightsContext;
 import dev.lambdaurora.lambdynlights.api.entity.EntityLightSourceManager;
 import dev.lambdaurora.lambdynlights.api.entity.luminance.EntityLuminance;
 import dev.lambdaurora.lambdynlights.api.item.ItemLightSourceManager;
@@ -41,14 +41,13 @@ public final class LambDynLightsCompat {
     private LambDynLightsCompat() {
     }
 
-    public static void init() {
+    public static void register(DynamicLightsContext context) {
         if (!REGISTERED.compareAndSet(false, true)) {
             return;
         }
 
-        EntityLightSourceManager manager = LambDynLights.get().entityLightSourceManager();
-        manager.onRegisterEvent().register(HANDLER_ID, context -> context.register(EntityType.PLAYER, PLAYER_LUMINANCE));
+        EntityLightSourceManager manager = context.entityLightSourceManager();
+        manager.onRegisterEvent().register(HANDLER_ID, registerContext -> registerContext.register(EntityType.PLAYER, PLAYER_LUMINANCE));
         BLMod.LOGGER.info("Dynamic lights: integrated via LambDynamicLights API");
     }
 }
-
