@@ -124,7 +124,7 @@ ext.resolveCurseforgeToken = {
 }
 
 tasks.register("publishCurseForgeAll") {
-    ["fabric", "neoforge", "quilt"].each { plat ->
+    ["fabric", "forge"].each { plat ->
         if (findProject(":modules:${plat}") != null) {
             dependsOn(":modules:${plat}:curseforge")
         }
@@ -149,7 +149,7 @@ ext.resolveModrinthToken = {
 }
 
 tasks.register("publishModrinthAll") {
-    ["fabric", "neoforge", "quilt"].each { plat ->
+    ["fabric", "forge"].each { plat ->
         if (findProject(":modules:${plat}") != null) {
             dependsOn(":modules:${plat}:modrinth")
         }
@@ -161,9 +161,9 @@ subprojects {
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
-    // ---- groupId: добавляем сегмент по лоадеру (common/fabric/neoforge/quilt)
+    // ---- groupId: добавляем сегмент по лоадеру (common/fabric/forge)
     def baseGroup = rootProject.maven_group
-    def platforms = ["common", "fabric", "neoforge", "quilt"]
+    def platforms = ["common", "fabric", "forge",]
     if (platforms.contains(project.name)) {
         group = "${baseGroup}.${project.name}"
     }
@@ -183,7 +183,7 @@ subprojects {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings loom.layered {
             it.mappings("net.fabricmc:yarn:$rootProject.yarn_mappings:v2")
-            it.mappings("dev.architectury:yarn-mappings-patch-neoforge:$rootProject.yarn_mappings_patch_neoforge_version")
+            // it.mappings("dev.architectury:yarn-mappings-patch-neoforge:$rootProject.yarn_mappings_patch_neoforge_version")
         }
         testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.2"
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.2"
@@ -287,7 +287,7 @@ subprojects {
 
 // Aggregate task to publish all platform modules to Maven
 tasks.register("publishMavenAll") {
-    ["common", "fabric", "neoforge", "quilt"].each { plat ->
+    ["common", "fabric", "forge"].each { plat ->
         if (findProject(":modules:${plat}") != null) {
             dependsOn(":modules:${plat}:publish")
         }

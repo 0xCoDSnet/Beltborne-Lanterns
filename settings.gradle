@@ -11,4 +11,4 @@ rootProject.name = 'beltborne_lanterns'
 
 include ':modules:common'
 include ':modules:fabric'
-include ':modules:neoforge'
+include ':modules:forge'
