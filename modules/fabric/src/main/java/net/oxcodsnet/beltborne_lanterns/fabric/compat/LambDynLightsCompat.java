@@ -1,5 +1,7 @@
 package net.oxcodsnet.beltborne_lanterns.fabric.compat;
 
+import dev.lambdaurora.lambdynlights.api.DynamicLightHandler;
+import dev.lambdaurora.lambdynlights.api.DynamicLightHandlers;
 import dev.lambdaurora.lambdynlights.api.DynamicLightsContext;
 import dev.lambdaurora.lambdynlights.api.entity.EntityLightSourceManager;
 import dev.lambdaurora.lambdynlights.api.entity.luminance.EntityLuminance;
@@ -21,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class LambDynLightsCompat {
     private static final Identifier HANDLER_ID = new Identifier(BLMod.MOD_ID, "player_lantern");
     private static final AtomicBoolean REGISTERED = new AtomicBoolean(false);
+    private static final AtomicBoolean LEGACY_REGISTERED = new AtomicBoolean(false);
 
     private static final EntityLuminance PLAYER_LUMINANCE = new EntityLuminance() {
         @Override
@@ -49,5 +52,29 @@ public final class LambDynLightsCompat {
         EntityLightSourceManager manager = context.entityLightSourceManager();
         manager.onRegisterEvent().register(HANDLER_ID, registerContext -> registerContext.register(EntityType.PLAYER, PLAYER_LUMINANCE));
         BLMod.LOGGER.info("Dynamic lights: integrated via LambDynamicLights API");
+
+        registerLegacyHandler();
+    }
+
+    public static void registerLegacyHandler() {
+        if (!LEGACY_REGISTERED.compareAndSet(false, true)) {
+            return;
+        }
+
+        try {
+            DynamicLightHandlers.registerDynamicLightHandler(
+                    EntityType.PLAYER,
+                    DynamicLightHandler.makeHandler(
+                            player -> {
+                                var lamp = BLClientAbstractions.clientLamp(player);
+                                return lamp != null ? LampRegistry.getLuminance(lamp) : 0;
+                            },
+                            player -> false
+                    )
+            );
+            BLMod.LOGGER.info("Dynamic lights: registered legacy LambDynamicLights handler");
+        } catch (Throwable t) {
+            BLMod.LOGGER.debug("Dynamic lights: legacy handler unavailable ({}).", t.toString());
+        }
     }
 }

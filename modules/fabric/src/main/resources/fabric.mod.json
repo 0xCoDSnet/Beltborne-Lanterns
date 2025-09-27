@@ -25,7 +25,7 @@
     "modmenu": [
       "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricModMenu"
     ],
-    "lambdynlights": [
+    "lambdynlights.initializer": [
       "net.oxcodsnet.beltborne_lanterns.fabric.compat.LambDynLightsInitializer"
     ]
   },
