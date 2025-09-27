@@ -4,7 +4,9 @@
   "version": "${version}",
   "name": "${mod_name}",
   "description": "${mod_description}",
-  "authors": ["${mod_authors}"],
+  "authors": [
+    "${mod_authors}"
+  ],
   "license": "${mod_license}",
   "contact": {
     "sources": "${mod_sources}",
@@ -25,7 +27,7 @@
     "modmenu": [
       "net.oxcodsnet.beltborne_lanterns.fabric.client.BLFabricModMenu"
     ],
-    "lambdynlights.initializer": [
+    "lambdynlights:initializer": [
       "net.oxcodsnet.beltborne_lanterns.fabric.compat.LambDynLightsInitializer"
     ]
   },
