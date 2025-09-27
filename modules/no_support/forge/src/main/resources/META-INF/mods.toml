@@ -1,33 +1,33 @@
 modLoader = "javafml"
 loaderVersion = "[47,)"
 #issueTrackerURL = ""
-license = "Insert License Here"
+license = "All Rights Reserved"
 
 [[mods]]
-modId = "example_mod"
+modId = "beltborne_lanterns"
 version = "${version}"
-displayName = "Example Mod"
-authors = "Me!"
+displayName = "Beltborne Lanterns"
+authors = "oxcodsnet"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+Adds wearable belt lanterns with configurable lighting and compatibility hooks.
 '''
 #logoFile = ""
 
-[[dependencies.example_mod]]
+[[dependencies.beltborne_lanterns]]
 modId = "forge"
 mandatory = true
 versionRange = "[47,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.example_mod]]
+[[dependencies.beltborne_lanterns]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.20.1,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.example_mod]]
+[[dependencies.beltborne_lanterns]]
 modId = "architectury"
 mandatory = true
 versionRange = "[9.2.14,)"

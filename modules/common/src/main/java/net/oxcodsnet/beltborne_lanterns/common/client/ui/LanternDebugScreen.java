@@ -189,11 +189,6 @@ public class LanternDebugScreen extends Screen {
     }
 
     @Override
-    protected void applyBlur(float delta) {
-        // keep world visible
-    }
-
-    @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         BLClientConfig c = BLClientConfigAccess.get();

@@ -1,6 +1,7 @@
 package net.oxcodsnet.beltborne_lanterns.fabric;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -28,9 +29,9 @@ public final class BLFabricServerEvents {
 
     public static void initialize() {
         // Handle client toggle requests
-        ServerPlayNetworking.registerGlobalReceiver(ToggleLanternPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            context.server().execute(() -> {
+        ServerPlayNetworking.registerGlobalReceiver(ToggleLanternPayload.ID, (server, player, handler, buf, responseSender) -> {
+            ToggleLanternPayload.read(buf);
+            server.execute(() -> {
                 // Try to toggle lantern via compatibility layers
                 for (var layer : CompatibilityLayerRegistry.getLayers()) {
                     if (layer.tryToggleLantern(player)) return;
@@ -80,7 +81,9 @@ public final class BLFabricServerEvents {
                     Identifier id = Identifier.tryParse(entry.id);
                     if (id != null) lampMap.put(id, entry.luminance);
                 });
-                ServerPlayNetworking.send(joining, new LampConfigSyncPayload(lampMap));
+                var buf = PacketByteBufs.create();
+                new LampConfigSyncPayload(lampMap).write(buf);
+                ServerPlayNetworking.send(joining, LampConfigSyncPayload.ID, buf);
             }
             // Send existing players' states to the joining player
             for (ServerPlayerEntity other : server.getPlayerManager().getPlayerList()) {

@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -49,17 +50,18 @@ public final class BLFabricClient implements ClientModInitializer {
         BLMod.LOGGER.info("Client initialization started [Fabric]");
 
         // Register network receiver: updates local client set
-        ClientPlayNetworking.registerGlobalReceiver(BeltSyncPayload.ID, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(BeltSyncPayload.ID, (client, handler, buf, responseSender) -> {
+            BeltSyncPayload payload = BeltSyncPayload.read(buf);
             UUID uuid = payload.playerUuid();
             Item lamp = payload.lampId() != null ? Registries.ITEM.get(payload.lampId()) : null;
-            MinecraftClient.getInstance().execute(() -> {
+            client.execute(() -> {
                 ClientBeltPlayers.setLamp(uuid, lamp);
             });
         });
 
         // This receiver handles lamp configs sent from a dedicated server.
-        ClientPlayNetworking.registerGlobalReceiver(LampConfigSyncPayload.ID, (payload, context) -> {
-            MinecraftClient client = MinecraftClient.getInstance();
+        ClientPlayNetworking.registerGlobalReceiver(LampConfigSyncPayload.ID, (client, handler, buf, responseSender) -> {
+            LampConfigSyncPayload payload = LampConfigSyncPayload.read(buf);
             client.execute(() -> {
                 var cliCfg = BLClientConfigAccess.get();
                 cliCfg.extraLampLight.clear();
@@ -144,7 +146,9 @@ public final class BLFabricClient implements ClientModInitializer {
             }
 
             if (toggleLanternKey.wasPressed()) {
-                ClientPlayNetworking.send(new ToggleLanternPayload());
+                var buf = PacketByteBufs.create();
+                new ToggleLanternPayload().write(buf);
+                ClientPlayNetworking.send(ToggleLanternPayload.ID, buf);
             }
 
             // Update lantern physics states for players who have a belt lantern

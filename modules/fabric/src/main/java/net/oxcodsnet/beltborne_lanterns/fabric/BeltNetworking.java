@@ -1,5 +1,6 @@
 package net.oxcodsnet.beltborne_lanterns.fabric;
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,12 +16,18 @@ public final class BeltNetworking {
     public static void broadcastBeltState(ServerPlayerEntity subject, Item lamp) {
         // Send to watchers + the subject themselves
         for (ServerPlayerEntity target : PlayerLookup.tracking(subject)) {
-            ServerPlayNetworking.send(target, new BeltSyncPayload(subject.getUuid(), lamp != null ? LampRegistry.getId(lamp) : null));
+            var buf = PacketByteBufs.create();
+            new BeltSyncPayload(subject.getUuid(), lamp != null ? LampRegistry.getId(lamp) : null).write(buf);
+            ServerPlayNetworking.send(target, BeltSyncPayload.ID, buf);
         }
-        ServerPlayNetworking.send(subject, new BeltSyncPayload(subject.getUuid(), lamp != null ? LampRegistry.getId(lamp) : null));
+        var selfBuf = PacketByteBufs.create();
+        new BeltSyncPayload(subject.getUuid(), lamp != null ? LampRegistry.getId(lamp) : null).write(selfBuf);
+        ServerPlayNetworking.send(subject, BeltSyncPayload.ID, selfBuf);
     }
 
     public static void sendTo(ServerPlayerEntity target, UUID subjectUuid, Item lamp) {
-        ServerPlayNetworking.send(target, new BeltSyncPayload(subjectUuid, lamp != null ? LampRegistry.getId(lamp) : null));
+        var buf = PacketByteBufs.create();
+        new BeltSyncPayload(subjectUuid, lamp != null ? LampRegistry.getId(lamp) : null).write(buf);
+        ServerPlayNetworking.send(target, BeltSyncPayload.ID, buf);
     }
 }

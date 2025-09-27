@@ -29,7 +29,7 @@ public final class LampRegistry {
     private record LampData(BlockState state, int luminance) {}
 
     private static final Map<Item, LampData> LAMPS = new LinkedHashMap<>();
-    public static final TagKey<Item> EXTRA_LAMPS_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(BLMod.MOD_ID, "lamps"));
+    public static final TagKey<Item> EXTRA_LAMPS_TAG = TagKey.of(RegistryKeys.ITEM, new Identifier(BLMod.MOD_ID, "lamps"));
 
     private LampRegistry() {}
 

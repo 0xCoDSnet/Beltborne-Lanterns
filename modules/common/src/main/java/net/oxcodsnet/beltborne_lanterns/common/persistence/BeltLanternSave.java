@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentState;
@@ -24,15 +24,9 @@ public final class BeltLanternSave extends PersistentState {
 
     private final Map<UUID, ItemStack> playersWithLamps = new HashMap<>();
 
-    private static final PersistentState.Type<BeltLanternSave> TYPE = new PersistentState.Type<>(
-            BeltLanternSave::new,
-            (nbt, lookup) -> BeltLanternSave.fromNbt(nbt, lookup),
-            null
-    );
-
     public static BeltLanternSave get(MinecraftServer server) {
         var psManager = server.getOverworld().getPersistentStateManager();
-        return psManager.getOrCreate(TYPE, SAVE_NAME);
+        return psManager.getOrCreate(BeltLanternSave::fromNbt, BeltLanternSave::new, SAVE_NAME);
     }
 
     public boolean has(UUID uuid) {
@@ -79,40 +73,22 @@ public final class BeltLanternSave extends PersistentState {
         markDirty();
     }
 
-    public static BeltLanternSave fromNbt(NbtCompound nbt) {
-        // Fallback path (legacy) – will not decode full stacks due to missing registry lookup
-        BeltLanternSave save = new BeltLanternSave();
-        NbtCompound map = nbt.getCompound(PLAYERS_KEY);
-        for (String key : map.getKeys()) {
-            try {
-                UUID uuid = UUID.fromString(key);
-                if (map.contains(key, NbtElement.STRING_TYPE)) {
-                    Identifier id = Identifier.tryParse(map.getString(key));
-                    if (id != null) {
-                        save.playersWithLamps.put(uuid, new ItemStack(net.minecraft.registry.Registries.ITEM.get(id)));
-                    }
-                }
-            } catch (IllegalArgumentException ignored) {}
-        }
-        return save;
-    }
-
-    public static BeltLanternSave fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+    private static BeltLanternSave fromNbt(NbtCompound nbt) {
         BeltLanternSave save = new BeltLanternSave();
         NbtCompound map = nbt.getCompound(PLAYERS_KEY);
         for (String key : map.getKeys()) {
             try {
                 UUID uuid = UUID.fromString(key);
                 NbtElement el = map.get(key);
-                if (el != null && !(el instanceof NbtString)) { // new format: full encoded stack
-                    ItemStack stack = ItemStack.fromNbt(registryLookup, el).orElse(ItemStack.EMPTY);
+                if (el instanceof NbtCompound compound) {
+                    ItemStack stack = ItemStack.fromNbt(compound);
                     if (!stack.isEmpty()) {
                         save.playersWithLamps.put(uuid, stack);
                     }
                 } else if (el instanceof NbtString) {
-                    Identifier id = Identifier.tryParse(map.getString(key));
-                    if (id != null) {
-                        save.playersWithLamps.put(uuid, new ItemStack(net.minecraft.registry.Registries.ITEM.get(id)));
+                    Identifier id = Identifier.tryParse(el.asString());
+                    if (id != null && Registries.ITEM.containsId(id)) {
+                        save.playersWithLamps.put(uuid, new ItemStack(Registries.ITEM.get(id)));
                     }
                 }
             } catch (IllegalArgumentException ignored) {}
@@ -121,11 +97,15 @@ public final class BeltLanternSave extends PersistentState {
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+    public NbtCompound writeNbt(NbtCompound nbt) {
         NbtCompound map = new NbtCompound();
         for (Map.Entry<UUID, ItemStack> e : playersWithLamps.entrySet()) {
-            NbtElement encoded = e.getValue().encode(registryLookup);
-            map.put(e.getKey().toString(), encoded);
+            ItemStack stack = e.getValue();
+            if (stack != null && !stack.isEmpty()) {
+                NbtCompound encoded = new NbtCompound();
+                stack.copy().writeNbt(encoded);
+                map.put(e.getKey().toString(), encoded);
+            }
         }
         nbt.put(PLAYERS_KEY, map);
         return nbt;
