@@ -18,7 +18,6 @@ import net.oxcodsnet.beltborne_lanterns.common.network.BeltSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.LampConfigSyncPayload;
 import net.oxcodsnet.beltborne_lanterns.common.network.ToggleLanternPayload;
 import net.oxcodsnet.beltborne_lanterns.common.server.BeltLanternServer;
-import net.oxcodsnet.beltborne_lanterns.common.DynamicLightsCompat;
 
 import java.util.UUID;
 
@@ -59,11 +58,6 @@ public final class BLNeoForgeNetwork {
                     for (var layer : CompatibilityLayerRegistry.getLayers()) {
                         layer.syncToggleOn(player);
                     }
-                    // Add dynamic light on enable (if mod present)
-                    DynamicLightsCompat.addFor(player);
-                } else {
-                    // Remove dynamic light on disable
-                    DynamicLightsCompat.removeFor(player);
                 }
             });
         });

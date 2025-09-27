@@ -19,7 +19,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
-import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.client.BLClientAbstractions;
 import net.oxcodsnet.beltborne_lanterns.common.client.ClientBeltPlayers;
 import net.oxcodsnet.beltborne_lanterns.common.client.LanternBeltFeatureRenderer;

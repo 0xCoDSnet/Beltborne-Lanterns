@@ -3,7 +3,6 @@ package net.oxcodsnet.beltborne_lanterns.fabric;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.oxcodsnet.beltborne_lanterns.BLMod;
-import net.oxcodsnet.beltborne_lanterns.common.LambDynLightsCompat;
 import net.oxcodsnet.beltborne_lanterns.common.compat.CompatibilityLayerRegistry;
 public final class BLFabric implements ModInitializer {
     @Override
@@ -21,9 +20,6 @@ public final class BLFabric implements ModInitializer {
 
         // Load all compatibility layers
         CompatibilityLayerRegistry.loadLayers(FabricLoader.getInstance()::isModLoaded);
-
-        // Common compatibility loader
-        LambDynLightsCompat.init();
 
         // Initialize all loaded compatibility layers
         CompatibilityLayerRegistry.initializeLayers();

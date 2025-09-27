@@ -46,6 +46,9 @@ dependencies {
     modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
     modRuntimeOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
 
+    // Optional: LambDynamicLights API (used without reflection)
+    modCompileOnly "dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${rootProject.lambdynlights_api_version}"
+    modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${rootProject.lambdynlights_api_version}")
 
     common(project(path: ':modules:common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':modules:common', configuration: 'transformProductionFabric')
@@ -54,6 +57,7 @@ dependencies {
 
 repositories {
     maven { url = 'https://maven.shedaniel.me/' }
+    maven { url = 'https://maven.lambdaurora.dev/releases' }
 }
 
 processResources {
